@@ -10,9 +10,10 @@ This is the source for my website at [[https://blog.rymcg.tech][blog.rymcg.tech]
 blog written in [[http://orgmode.org/][org-mode]] and published with [[https://github.com/kaushalmodi/ox-hugo/][ox-hugo]]. 
 
 The sections below contain the entirety of the website: the articles
-and blog posts, its configuration, the templates, themes, build process,
-and deployment scripts. If my website were to go down, I could
-recreate it from nothing but this file (plus any static assets, images.)
+and blog posts, its configuration, the templates, themes, build
+process, and deployment scripts. If my website were to go down, I
+could recreate it from nothing but this file (plus any static assets,
+images, etc.)
 
 This is a self-documenting deployment environment, using a literate
 programming style written with [[http://org-babel.readthedocs.io][org-babel]] code blocks. Download the
