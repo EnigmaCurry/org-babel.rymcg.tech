@@ -32,7 +32,7 @@ Install Emacs, org-mode, and hugo, by following the links above.
 
 ** ox-hugo
 This is the main config, it configures ox-hugo, initializes our blog
-directory, and the sets up hugo server to run inside an Emacs eshell.
+directory, and sets up hugo server to run inside an Emacs eshell.
 
 #+NAME: ox-hugo-init
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.el
@@ -82,10 +82,6 @@ directory, and the sets up hugo server to run inside an Emacs eshell.
 Here's my main hugo config file:
 
 #+BEGIN_SRC yml :tangle ~/git/rymcg.tech/blog/config.yml :eval no :mkdirp yes
-### This file is auto-generated. Do not edit! 
-### Your changes will get overwritten. 
-### Look in ~/git/rymcg.tech/config.org for the source.
-
 baseURL: "https://blog.rymcg.tech/"
 languageCode: "en-us"
 DefaultContentLanguage: "en"
