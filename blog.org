@@ -16,7 +16,7 @@ recreate it from nothing but this file (plus any static assets, images.)
 
 This is a self-documenting deployment environment, using a literate
 programming style written with [[http://org-babel.readthedocs.io][org-babel]] code blocks. Download the
-[the org source file] and you can edit it to make any customizations,
+[[https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org][the org source file]] and you can edit it to make any customizations,
 and build your own website just like this one. 
 
 ** Dependencies
