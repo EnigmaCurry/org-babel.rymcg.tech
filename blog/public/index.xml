@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Front Page on rymcg.tech</title>
+    <link>https://blog.rymcg.tech/</link>
+    <description>Recent content in Front Page on rymcg.tech</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="https://blog.rymcg.tech/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>def-advice</title>
+      <link>https://blog.rymcg.tech/emacs/def-advice/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.rymcg.tech/emacs/def-advice/</guid>
+      <description>It&amp;rsquo;s cool..</description>
+    </item>
+    
+    <item>
+      <title>second emacs post</title>
+      <link>https://blog.rymcg.tech/emacs/emacs-post-2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.rymcg.tech/emacs/emacs-post-2/</guid>
+      <description>Hi you gnu elpanizers</description>
+    </item>
+    
+    <item>
+      <title>first emacs post and a rather unfortunately long title that just goes on and on and on and on.</title>
+      <link>https://blog.rymcg.tech/emacs/emacs-post-1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.rymcg.tech/emacs/emacs-post-1/</guid>
+      <description> Hi emacsers!
+Subheading 1 Subheading 2 </description>
+    </item>
+    
+    <item>
+      <title>elisp tips</title>
+      <link>https://blog.rymcg.tech/emacs/elips-tips/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.rymcg.tech/emacs/elips-tips/</guid>
+      <description>(message &amp;#34;Hi Emacsians!</description>
+    </item>
+    
+    <item>
+      <title>sub section 1</title>
+      <link>https://blog.rymcg.tech/book1/chapter1/section1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.rymcg.tech/book1/chapter1/section1/</guid>
+      <description>Section 1 of chapter 1</description>
+    </item>
+    
+    <item>
+      <title>sub section 1</title>
+      <link>https://blog.rymcg.tech/book1/chapter2/section1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.rymcg.tech/book1/chapter2/section1/</guid>
+      <description>Section 1 of chapter 2</description>
+    </item>
+    
+    <item>
+      <title>sub section 2</title>
+      <link>https://blog.rymcg.tech/book1/chapter1/section2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.rymcg.tech/book1/chapter1/section2/</guid>
+      <description>Section 2 of chapter 1</description>
+    </item>
+    
+    <item>
+      <title>sub section 2</title>
+      <link>https://blog.rymcg.tech/book1/chapter2/section2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.rymcg.tech/book1/chapter2/section2/</guid>
+      <description>Section 2 of chapter 2</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://blog.rymcg.tech/_header/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.rymcg.tech/_header/</guid>
+      <description>rymcg.tech</description>
+    </item>
+    
+  </channel>
+</rss>

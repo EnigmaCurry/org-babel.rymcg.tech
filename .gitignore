@@ -1,0 +1,5 @@
+# Ignore all hugo content except for public:
+# This is because it is all generated in blog.org
+/blog/content
+/blog/static
+/blog/config.yml
