@@ -26,10 +26,33 @@ My configuration consists of:
 - [[https://www.gnu.org/software/emacs/][Emacs]] 25
 - [[https://www.gnu.org/software/emacs/][Org Mode]] 9 from the [[http://orgmode.org/elpa.html][project repos]]
 - [[https://gohugo.io/][Hugo]] git:master
- - I'm using a dev build with [[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][kaushalmodi's script]] 
-  - Watch out, I hardcoded a GOPATH:
 
-#+BEGIN_SRC shell
+** Deficiencies
+ - *Path names are defined multiple places*. I have not yet found a
+   way to make org-babel reference a single common root directory. I
+   can set =:dir= in the parent tree, but I can't seem to append a
+   filename on to the end of it or reference a variable in that
+   context. So just be aware that (for now) you have to search and
+   replace =~/git/rymcg.tech/=, at multiple places in this file and
+   change them to your directory structure. (There may be other
+   things, I expect you to be the type of person who *reads* code
+   before running it.....)
+ - My netlify deploy is pure static files. I have my .gitignore setup
+   to ignore commiting anything but this file (blog.org) and the
+   =public= directory. Eventually I want the server to build the site,
+   but only after hugo development cycle settles down and they install
+   a good version for things like syntax highlighing properly. I'm
+   guessing there's some orchestation possible to get the master
+   versions, as in the script in the next section, but I figure it's
+   easier to just wait a few days..
+
+** Install dev version of hugo
+Currently I use the latest devolpment version of hugo, because I'm
+waiting for recent bugfixes to make it into stable. Here is
+[[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][kaushalmodi's script]] with a few tweaks. (Watch out, I hardcoded
+$GOPATH)
+
+#+BEGIN_SRC sh :eval no-export :results none
 # /home/kmodi/go.apps/src/github.com/gohugoio/hugo/README.md
 # http://matthewkwilliams.com/index.php/2014/09/28/go-executables-are-statically-linked-except-when-they-are-not/
 
@@ -38,7 +61,8 @@ here=$(pwd)
 hugo_src="github.com/gohugoio/hugo"
 chroma_src="github.com/alecthomas/chroma"
 
-export GOPATH="~/git/rymcg.tech/blog/"
+export GOPATH=$HOME/git/rymcg.tech/blog/go
+mkdir -p $GOPATH
 export CGO_ENABLED=0
 export GO_EXTLINK_ENABLED=0
 
@@ -98,38 +122,54 @@ go install -v \
 cd "${here}" || exit
 #+END_SRC
 
-** Deficiencies
-*** Path names are defined multiple places
-I have not yet found a way to make org-babel reference a single common
-root directory. I can set =:dir= in the parent tree, but I can't seem
-to append a filename on to the end of it or reference a variable in
-that context. So just be aware that (for now) you have to search and
-replace =~/git/rymcg.tech/= to your directory structure, at multiple
-places in this file (and there may be other things, I expect you to be
-the type of person who *reads* code before running it.....)
-*** My netlify deploy is pure static files
-I have my .gitignore setup to ignore commiting anything but this file
-(blog.org) and the =public= directory. Eventually I want the server to
-build the site, but only after hugo development cycle settles down and
-they install a good version for things like syntax highlighing
-properly. I'm guessing there's some orchestation possible to get the
-master versions, as in the script in the Dependencies, but I figure
-it's easier to just wait a few days.. 
+
 
 ** Install
- - Put [[https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org][blog.org]] in your =~/.emacs.d=. 
- - Put this in your own init to bootstrap:
-#+BEGIN_EXAMPLE emacs-lisp
+ - Download [[https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org][blog.org]] to your =~/.emacs.d=. 
+ - Put this in your own =~/.emacs.d/{init.el,config.org}=: 
+#+BEGIN_SRC emacs-lisp
 (let ((blog-init (expand-file-name "~/.emacs.d/blog.el")))
   (if (file-exists-p blog-init)
     (load-file blog-init)))
-#+END_EXAMPLE
+#+END_SRC
+ - (Don't worry, blog.el is taken care of in the next part.)
+
+** Run!
+
+These are the manual steps for building the website. Later on we'll
+build up a script to automate all this, so all though the next bit is
+a bit tedious, this should be much clearer conceptually how this thing
+works:
+
+ - Open up your new =~/.emacs.d/blog.org=, in Emacs.
+ - If you installed org-mode correctly, all should be true:
+  - The file will open up in org-mode automatically, because it ends
+    in =.org=.
+  - You should see =Org= in the modeline.
+  - =M-x org-version= should say something like 9.1 or higher.
+ - Search and replace all the =~/git/rymcg.tech= directory references
+   to make them your own local website git clone. (See caveat in
+   [[Deficiencies]].)
+ - Save the file. It's yours, remeber!
+ - Now tangle all the org-babel code blocks: (aka. 'render all code blocks
+   marked with =:tangle= to the specified external file.')
+  - Type ==C-c C-v t== (or =M-x org-babel-tangle=)
+ - Now run ox-hugo to export to markdown:
+  - Type ==C-c C-e H A== (or =C-1 M-x org-hugo-export-subtree-to-md=)
+ - Now run hugo to translate the markdown to the public html:
+  - Type =M-x eshell-command RET bash -c 'cd ~/git/rymcg.tech/blog; ./go/bin/hugo'=
+  - That last one I was kidding.
+  - I just open a terminal in =~/git/rymcg.tech/blog= and run =./go/bin/hugo=.
 
 ** ox-hugo
 This is the main config, it configures ox-hugo, initializes our blog
 directory, and sets up hugo server to run inside an Emacs eshell.
 
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.el
+(use-package org-babel-eval-in-repl
+  :ensure t
+  :init
+  (require 'eval-in-repl-shell))
 (use-package ox-hugo
   :ensure t
   :after ox
@@ -159,7 +199,7 @@ directory, and sets up hugo server to run inside an Emacs eshell.
     
   (defun hugo-server-start ()
     "Start hugo server in an inferior shell"
-    (interactive)
+   (interactive)
     (let ((eshell-buffer-name (concat "*hugo-server-" my/hugo-root "*")))
       (if (bufferp (get-buffer eshell-buffer-name))
           (kill-buffer eshell-buffer-name))
