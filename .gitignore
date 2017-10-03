@@ -1,6 +1,2 @@
-# Ignore all hugo content except for public:
-# This is because it is all generated in blog.org
-/blog/content
-/blog/static
-/blog/config.yml
-blog/go
+# Ignore all hugo content, because it is all generated in blog.org
+/blog

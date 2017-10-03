@@ -208,8 +208,9 @@ directory, and sets up hugo server to run inside an Emacs eshell.
   :init
   (setq org-hugo-external-file-extensions-allowed-for-copying 
         '(org tex jpg png svg pdf))
-  (setq my/blog-file (expand-file-name "~/git/rymcg.tech/blog.org"))
-  (setq my/hugo-root (expand-file-name "~/git/rymcg.tech/blog"))
+  (setq my/blog-root (expand-file-name "~/git/rymcg.tech"))
+  (setq my/blog-file (concat my/blog-root "/blog.org"))
+  (setq my/hugo-root (concat my/blog-root "/blog"))
   (setq my/hugo-server-url "http://localhost:1313")
 
   ; blog related functions defined inside of use-package' =:init= conveniently
@@ -227,8 +228,31 @@ directory, and sets up hugo server to run inside an Emacs eshell.
                  (let ((org-confirm-babel-evaluate nil))
                    (org-babel-execute-src-block-maybe)))))
      my/blog-file '("hugo-import-theme")))
-    (blog-init)
-    
+  (blog-init)
+  
+  (defun blog-publish ()
+    (interactive)
+    (let ((default-directory my/blog-root))    
+      ; Check we're on the master branch:
+      (if (not (= 0 (call-process-shell-command 
+                     "[[ `git rev-parse --abbrev-ref HEAD` == \"master\" ]]")))
+          (message "Need to be on master branch to publish blog")
+        ; Tangle all files:
+        (org-babel-tangle-file my/blog-file)
+        ; Run ox-hugo to generate Markdown:
+        (org-hugo-export-subtree-to-md 1)
+        ; Check for uncommited changes:
+        (if (not (= 0 (call-process-shell-command "git diff-index --quiet HEAD --")))
+            (message "Need to commit changes before publishing.")
+          ; Generate hugo static site in a temporary directory:
+          (let ((temp-hugo-dir (make-temp-file "hugo-tmp"))
+                (default-directory my/hugo-root))
+            (if (not (= 0 (call-process-shell-command (concat "./go/bin/hugo -d " temp-hugo-dir))))
+                (message (concat "Failed to create hugo site in " temp-hugo-dir))
+              ; Create gh-pages branch
+              (call-process-shell-command
+            ))))))
+
   (defun hugo-server-start ()
     "Start hugo server in an inferior shell"
    (interactive)
