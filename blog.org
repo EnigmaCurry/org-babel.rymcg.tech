@@ -39,6 +39,11 @@ that context. So just be aware that (for now) you have to search and
 replace =~/git/rymcg.tech/= to your directory structure, at multiple
 places in this file (and there may be other things, I expect you to be
 the type of person who *reads* code before running it.....)
+*** My netlify deploy is pure static files
+I have my .gitignore setup to ignore commiting anything but this file
+(blog.org) and the =public= directory. Eventually I want the server to
+build the site, but after hugo development settles and they install a
+good version for things like syntax highlighing properly...
 ** ox-hugo
 This is the main config, it configures ox-hugo, initializes our blog
 directory, and sets up hugo server to run inside an Emacs eshell.
