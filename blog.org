@@ -30,6 +30,15 @@ My configuration consists of:
 
 Install Emacs, org-mode, and hugo, by following the links above.
 
+** Deficiencies
+*** Path names are defined multiple places
+I have not yet found a way to make org-babel reference a single common
+root directory. I can set =:dir= in the parent tree, but I can't seem
+to append a filename on to the end of it or reference a variable in
+that context. So just be aware that (for now) you have to search and
+replace =~/git/rymcg.tech/= to your directory structure, at multiple
+places in this file (and there may be other things, I expect you to be
+the type of person who *reads* code before running it.....)
 ** ox-hugo
 This is the main config, it configures ox-hugo, initializes our blog
 directory, and sets up hugo server to run inside an Emacs eshell.
