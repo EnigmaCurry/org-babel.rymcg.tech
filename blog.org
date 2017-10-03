@@ -216,6 +216,7 @@ directory, and sets up hugo server to run inside an Emacs eshell.
   (setq my/blog-root (expand-file-name "~/git/rymcg.tech"))
   (setq my/blog-file (concat my/blog-root "/blog.org"))
   (setq my/hugo-root (concat my/blog-root "/blog"))
+  (setq my/hugo-public-branch "public")
   (setq my/hugo-server-url "http://localhost:1313")
 
   ; blog related functions defined inside of use-package' =:init= conveniently
@@ -236,7 +237,7 @@ directory, and sets up hugo server to run inside an Emacs eshell.
   (blog-init)
   
   (defun blog-publish ()
-    "Build and publish the blog to the gh-pages branch"
+    "Build and publish the blog to the public branch"
     (interactive)
     (let ((default-directory my/blog-root))    
       ; Check we're on the master branch:
@@ -253,12 +254,14 @@ directory, and sets up hugo server to run inside an Emacs eshell.
         ; Check for uncommited changes:
         (if (not (= 0 (call-process-shell-command "git diff-index --quiet HEAD --")))
             (message "Need to commit changes before publishing.")
-          ; Delete gh-pages branch:
-          (call-process-shell-command "git branch -D gh-pages")
-          ; Recreate gh-pages branch from scratch:
-          (if (not (= 0 (call-process-shell-command "git rev-parse --verify gh-pages")))
+          ; Delete public branch:
+          (call-process-shell-command (concat "git branch -D " my/hugo-public-branch))
+          ; Recreate public branch from scratch:
+          (if (not (= 0 (call-process-shell-command 
+                         (concat "git rev-parse --verify " my/hugo-public-branch))))
               (progn
-                (call-process-shell-command "git checkout --orphan gh-pages")
+                (call-process-shell-command (concat "git checkout --orphan " 
+                                                    my/hugo-public-branch))
                 (call-process-shell-command "git rm --cached -r .") 
                 (call-process-shell-command (concat "echo -e '*\n"
                                                     "!.gitignore\n"
@@ -271,11 +274,11 @@ directory, and sets up hugo server to run inside an Emacs eshell.
                 (call-process-shell-command "git commit -m 'initial static html setup'")
                 ))
           ; Commit generated HTML:
-          (call-process-shell-command "git add blog/public/* && git commit -m gh-pages")
+          (call-process-shell-command "git add blog/public/* && git commit -m public")
           ; Go back to master:
           (call-process-shell-command "git checkout master")
           ; Push
-          (call-process-shell-command "git push -f origin gh-pages")))))
+          (call-process-shell-command (concat "git push -f origin " my/hugo-public-branch))))))
 
   (defun hugo-server-start ()
     "Start hugo server in an inferior shell"
