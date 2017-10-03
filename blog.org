@@ -195,12 +195,17 @@ Steps to run each time you want to publish =blog.org=:
   - I just open a terminal in =~/git/rymcg.tech/blog= and run =./go/bin/hugo=.
  - Transfer the =~/git/rymcg.tech/blog/public= directory to your web host.
 
-Phew! 
+*Phew!*
 
 Now that you went through all that, and you understand it, you have
-graduated to using the automated script. Read the next section, and
+graduated to using the *automated* script (yay!) Read the next section, and
 then just run =M-x blog-publish= from now on. It will create a new
-=gh-pages= branch and build and publish HTML to =blog/public=.
+=public= branch, where it will build and publish HTML to
+=blog/public=. The =public= branch is ephemeral, it gets blown away
+and created from scratch each time you run =M-x blog-publish=. Keep
+your =blog.org= in the =master= branch. Keeping the HTML in a seperate
+branch, keeps commits clean. Hosts like [[https://www.netlify.com/][netlify]] make it easy to
+publish specific git branches and sub directories.
 
 ** ox-hugo
 This is the main config, it configures ox-hugo, initializes our blog
