@@ -179,6 +179,10 @@
 <li><a href="#ox-hugo">ox-hugo</a></li>
 <li><a href="#hugo-site-skeleton">Hugo site skeleton</a></li>
 <li><a href="#code-block-headers">Code block headers</a></li>
+<li><a href="#half-baked-ideas">Half baked ideas</a>
+<ul>
+<li><a href="#export-the-output-of-code-blocks-and-timestamp-of-last-run">Export the output of code blocks and timestamp of last run</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -208,9 +212,9 @@ could recreate it from nothing but this file (plus any static assets,
 images, etc.)</p>
 
 <p>This is a self-documenting deployment environment, using a literate
-programming style written with <a href="http://org-babel.readthedocs.io">org-babel</a> code blocks. Download the
-<a href="https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org">the org source file</a> and you can edit it to make any customizations,
-and build your own website just like this one.</p>
+programming style written with <a href="http://org-babel.readthedocs.io">org-babel</a> code blocks. Download the <a href="https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org">org
+source file</a> and you can edit it to make any customizations, and build
+your own website just like this one.</p>
 
 <h2 id="dependencies">Dependencies</h2>
 
@@ -584,7 +588,7 @@ mediaTypes:
 <span class="nt">div</span><span class="p">.</span><span class="nc">block-header</span><span class="p">.</span><span class="nc">exec</span> <span class="p">{</span>
     <span class="k">background-color</span><span class="p">:</span> <span class="mh">#b93838</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nt">div</span><span class="p">.</span><span class="nc">block-header</span><span class="p">.</span><span class="nc">example</span> <span class="p">{</span>
+<span class="nt">div</span><span class="p">.</span><span class="nc">block-header</span><span class="p">.</span><span class="nc">example</span><span class="o">,</span> <span class="nt">div</span><span class="p">.</span><span class="nc">block-header</span><span class="p">.</span><span class="nc">results</span> <span class="p">{</span>
     <span class="k">background-color</span><span class="p">:</span> <span class="mh">#4d4b54</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="p">.</span><span class="nc">copy-to-clipboard</span> <span class="p">{</span>
@@ -778,6 +782,85 @@ HTML.</p>
   <span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">org-export-before-processing-hook</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">rymcg/org-hugo-add-tangle-names-to-export</span><span class="p">)))</span>
     <span class="nv">ad-do-it</span><span class="p">))</span>
 <span class="p">(</span><span class="nv">ad-activate</span> <span class="ss">&#39;org-hugo-export-subtree-to-md</span><span class="p">)</span></code></pre></div>
+<h2 id="half-baked-ideas">Half baked ideas</h2>
+
+<h3 id="export-the-output-of-code-blocks-and-timestamp-of-last-run">Export the output of code blocks and timestamp of last run</h3>
+
+<div class='block-header fn'>Create in ~/.emacs.d/blog.el</div>
+<div class="highlight"><pre class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">defadvice</span> <span class="nv">org-babel-insert-result</span> <span class="p">(</span><span class="nv">after</span> <span class="nv">org-babel-record-result-timestamp</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">code-block-params</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">2</span> <span class="p">(</span><span class="nv">org-babel-get-src-block-info</span><span class="p">)))</span>
+        <span class="p">(</span><span class="nv">code-block-name</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">4</span> <span class="p">(</span><span class="nv">org-babel-get-src-block-info</span><span class="p">))))</span>
+    <span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">timestamp</span> <span class="p">(</span><span class="nf">cdr</span> <span class="p">(</span><span class="nf">assoc</span> <span class="nb">:timestamp</span> <span class="nv">code-block-params</span><span class="p">)))</span>
+          <span class="p">(</span><span class="nv">result-params</span> <span class="p">(</span><span class="nf">assoc</span> <span class="nb">:result-params</span> <span class="nv">code-block-params</span><span class="p">)))</span>
+      <span class="p">(</span><span class="nb">if</span> <span class="p">(</span><span class="nb">and</span> <span class="p">(</span><span class="nf">equal</span> <span class="nv">timestamp</span> <span class="s">&#34;t&#34;</span><span class="p">)</span>
+               <span class="p">(</span><span class="nf">&gt;</span> <span class="p">(</span><span class="nf">length</span> <span class="nv">code-block-name</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+               <span class="p">(</span><span class="nf">member</span> <span class="s">&#34;html&#34;</span> <span class="nv">result-params</span><span class="p">))</span>
+          <span class="p">(</span><span class="nb">save-excursion</span>
+            <span class="p">(</span><span class="nf">goto-char</span> <span class="p">(</span><span class="nf">point-min</span><span class="p">))</span>
+            <span class="p">(</span><span class="nv">search-forward-regexp</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;^\w*#\\+RESULTS: &#34;</span>
+                                           <span class="nv">code-block-name</span>
+                                           <span class="s">&#34;\n\w*#\\+BEGIN_EXPORT html\n&#34;</span><span class="p">))</span>
+            <span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">beg</span> <span class="p">(</span><span class="nf">point</span><span class="p">)))</span>
+              <span class="p">(</span><span class="nv">search-forward-regexp</span> <span class="s">&#34;^\w*#\\+END_EXPORT&#34;</span><span class="p">)</span>
+              <span class="p">(</span><span class="nf">beginning-of-line</span><span class="p">)</span>
+              <span class="p">(</span><span class="nv">kill-region</span> <span class="nv">beg</span> <span class="p">(</span><span class="nf">point</span><span class="p">)))</span>
+            <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">format</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;&lt;div class=\&#34;block-header results\&#34;&gt;&#34;</span>
+                                    <span class="s">&#34;Output - Last run: %s&lt;/div&gt;\n&#34;</span><span class="p">)</span>
+                            <span class="p">(</span><span class="nf">format-time-string</span> <span class="s">&#34;%F %r&#34;</span><span class="p">)))</span>
+            <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">format</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;&lt;div class=\&#34;block-results\&#34; &#34;</span>
+                                    <span class="s">&#34;id=\&#34;results-%s\&#34;&gt;&lt;pre class=\&#34;chroma\&#34;&gt;\n&#34;</span><span class="p">)</span>
+                            <span class="nv">code-block-name</span><span class="p">))</span>
+            <span class="p">(</span><span class="nv">yank</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">insert</span> <span class="s">&#34;&lt;/pre&gt;&lt;/div&gt;\n&#34;</span><span class="p">))</span>
+        <span class="p">(</span><span class="nb">if</span> <span class="p">(</span><span class="nf">equal</span> <span class="nv">timestamp</span> <span class="s">&#34;t&#34;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">message</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;Result timestamping requires a #+NAME: &#34;</span>
+                             <span class="s">&#34;and a &#39;:results html&#39; argument.&#34;</span><span class="p">)))))))</span>
+<span class="p">(</span><span class="nv">ad-activate</span> <span class="ss">&#39;org-babel-insert-result</span><span class="p">)</span></code></pre></div>
+<p>Output requires the code block to have all these parameters:</p>
+
+<ul>
+<li><code>#+NAME:</code>
+
+<ul>
+<li>A unique name for the code block ensures that the correct result
+block will be updated.</li>
+</ul></li>
+<li><code>:timestamp t</code>
+
+<ul>
+<li>Turns on the timestamp</li>
+</ul></li>
+<li><code>:exports both</code>
+
+<ul>
+<li>Exports both the code block itself, and it&rsquo;s output, to HTML.</li>
+</ul></li>
+<li><code>:results html</code>
+
+<ul>
+<li>Formats the result as HTML.</li>
+</ul></li>
+<li><code>:eval never-export</code>
+
+<ul>
+<li>(Optional) Makes it so the block is <strong>not</strong> automatically evaluated
+on export. It has to be manually run.</li>
+</ul></li>
+</ul>
+
+<div class='block-header exec'>Run</div>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">whoami
+ls</code></pre></div>
+<p>Results and timestamp are exported to HTML each time the block is re-evaluated:</p>
+
+<div class="block-header results">Output - Last run: 2017-10-03 01:40:47 PM</div>
+<div class="block-results" id="results-testguy"><pre class="chroma">
+ryan
+~
+blog
+blog.org
+</pre></div>
+
 
 <footer class=" footline" >
 	

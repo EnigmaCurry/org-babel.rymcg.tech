@@ -16,9 +16,9 @@ could recreate it from nothing but this file (plus any static assets,
 images, etc.)
 
 This is a self-documenting deployment environment, using a literate
-programming style written with [[http://org-babel.readthedocs.io][org-babel]] code blocks. Download the
-[[https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org][the org source file]] and you can edit it to make any customizations,
-and build your own website just like this one. 
+programming style written with [[http://org-babel.readthedocs.io][org-babel]] code blocks. Download the [[https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org][org
+source file]] and you can edit it to make any customizations, and build
+your own website just like this one.
 
 ** Dependencies
 My configuration consists of:
@@ -368,7 +368,7 @@ div.block-header.fn {
 div.block-header.exec {
     background-color: #b93838;    
 }
-div.block-header.example {
+div.block-header.example, div.block-header.results {
     background-color: #4d4b54;
 }
 .copy-to-clipboard {
@@ -568,6 +568,75 @@ HTML.
     ad-do-it))
 (ad-activate 'org-hugo-export-subtree-to-md)
 #+END_SRC
+
+** Half baked ideas
+*** Export the output of code blocks and timestamp of last run
+
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.el
+(defadvice org-babel-insert-result (after org-babel-record-result-timestamp)
+  (let ((code-block-params (nth 2 (org-babel-get-src-block-info)))
+        (code-block-name (nth 4 (org-babel-get-src-block-info))))
+    (let ((timestamp (cdr (assoc :timestamp code-block-params)))
+          (result-params (assoc :result-params code-block-params)))
+      (if (and (equal timestamp "t") 
+               (> (length code-block-name) 0)
+               (member "html" result-params))
+          (save-excursion
+            (goto-char (point-min))
+            (search-forward-regexp (concat "^\w*#\\+RESULTS: " 
+                                           code-block-name 
+                                           "\n\w*#\\+BEGIN_EXPORT html\n"))
+            (let ((beg (point)))
+              (search-forward-regexp "^\w*#\\+END_EXPORT")
+              (beginning-of-line)
+              (kill-region beg (point)))
+            (insert (format (concat "<div class=\"block-header results\">"
+                                    "Output - Last run: %s</div>\n")
+                            (format-time-string "%F %r")))
+            (insert (format (concat "<div class=\"block-results\" "
+                                    "id=\"results-%s\"><pre class=\"chroma\">\n") 
+                            code-block-name))
+            (yank)
+            (insert "</pre></div>\n"))
+        (if (equal timestamp "t")
+            (message (concat "Result timestamping requires a #+NAME: "
+                             "and a ':results html' argument.")))))))
+(ad-activate 'org-babel-insert-result)
+#+END_SRC
+
+Output requires the code block to have all these parameters:
+
+ - =#+NAME:=
+  - A unique name for the code block ensures that the correct result
+    block will be updated.
+ - =:timestamp t=
+  - Turns on the timestamp
+ - =:exports both= 
+  - Exports both the code block itself, and it's output, to HTML.
+ - =:results html= 
+  - Formats the result as HTML.
+ - =:eval never-export= 
+  - (Optional) Makes it so the block is *not* automatically evaluated
+    on export. It has to be manually run.
+
+#+NAME: testguy
+#+BEGIN_SRC shell :results html :exports both :eval never-export :timestamp t
+whoami
+ls
+#+END_SRC
+
+Results and timestamp are exported to HTML each time the block is re-evaluated:
+
+#+RESULTS: testguy
+#+BEGIN_EXPORT html
+<div class="block-header results">Output - Last run: 2017-10-03 01:40:47 PM</div>
+<div class="block-results" id="results-testguy"><pre class="chroma">
+ryan
+~
+blog
+blog.org
+</pre></div>
+#+END_EXPORT
 
 * Front Page
 :PROPERTIES:

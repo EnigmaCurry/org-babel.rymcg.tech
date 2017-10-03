@@ -83,7 +83,7 @@ div.block-header.fn {
 div.block-header.exec {
     background-color: #b93838;    
 }
-div.block-header.example {
+div.block-header.example, div.block-header.results {
     background-color: #4d4b54;
 }
 .copy-to-clipboard {
