@@ -172,6 +172,12 @@
 <li>
 <ul>
 <li><a href="#dependencies">Dependencies</a></li>
+<li><a href="#deficiencies">Deficiencies</a>
+<ul>
+<li><a href="#path-names-are-defined-multiple-places">Path names are defined multiple places</a></li>
+<li><a href="#my-netlify-deploy-is-pure-static-files">My netlify deploy is pure static files</a></li>
+</ul></li>
+<li><a href="#install">Install</a></li>
 <li><a href="#ox-hugo">ox-hugo</a></li>
 <li><a href="#hugo-site-skeleton">Hugo site skeleton</a></li>
 <li><a href="#code-block-headers">Code block headers</a></li>
@@ -218,28 +224,121 @@ and build your own website just like this one.</p>
 <li><a href="https://gohugo.io/">Hugo</a> git:master
 
 <ul>
-<li>I&rsquo;m using a <a href="https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676">dev build using this script</a>, until <a href="https://github.com/alecthomas/chroma/commit/cbc3d5b9f01cbd0113748fa12d9d0cb9cfdda537">this fix is in</a>.</li>
+<li>I&rsquo;m using a dev build with <a href="https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676">kaushalmodi&rsquo;s script</a>
+
+<ul>
+<li>Watch out, I hardcoded a GOPATH:</li>
+</ul></li>
 </ul></li>
 </ul>
 
-<p>Install Emacs, org-mode, and hugo, by following the links above.</p>
+<div class='block-header exec'>Run</div>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># /home/kmodi/go.apps/src/github.com/gohugoio/hugo/README.md
+</span><span class="c1"># http://matthewkwilliams.com/index.php/2014/09/28/go-executables-are-statically-linked-except-when-they-are-not/
+</span><span class="c1"></span>
+<span class="nv">here</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>
 
+<span class="nv">hugo_src</span><span class="o">=</span><span class="s2">&#34;github.com/gohugoio/hugo&#34;</span>
+<span class="nv">chroma_src</span><span class="o">=</span><span class="s2">&#34;github.com/alecthomas/chroma&#34;</span>
+
+<span class="nb">export</span> <span class="nv">GOPATH</span><span class="o">=</span><span class="s2">&#34;~/git/rymcg.tech/blog/&#34;</span>
+<span class="nb">export</span> <span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span>
+<span class="nb">export</span> <span class="nv">GO_EXTLINK_ENABLED</span><span class="o">=</span><span class="m">0</span>
+
+<span class="c1"># https://discuss.gohugo.io/t/started-getting-failed-to-normalize-url-string-returning-in/5034/7?u=kaushalmodi
+</span><span class="c1"># Do govendor sync to prevent issues like this: https://github.com/gohugoio/hugo/issues/2919
+</span><span class="c1"></span><span class="k">if</span> ! <span class="nb">hash</span> govendor <span class="m">2</span>&gt;/dev/null
+<span class="k">then</span>
+    go get -u -v github.com/kardianos/govendor
+<span class="k">fi</span>
+
+<span class="c1"># Install hugo for the first time so that the ${GOPATH}/src/${hugo_src}
+</span><span class="c1"># directory gets populated.
+</span><span class="c1"></span><span class="k">if</span> <span class="o">[[</span> ! -d <span class="s2">&#34;</span><span class="si">${</span><span class="nv">GOPATH</span><span class="si">}</span><span class="s2">/src/</span><span class="si">${</span><span class="nv">hugo_src</span><span class="si">}</span><span class="s2">&#34;</span> <span class="o">]]</span> <span class="o">||</span> <span class="o">(</span> ! <span class="nb">hash</span> hugo <span class="m">2</span>&gt;/dev/null <span class="o">)</span>
+<span class="k">then</span>
+    go get -u -v <span class="si">${</span><span class="nv">hugo_src</span><span class="si">}</span>
+<span class="k">fi</span>
+
+<span class="c1"># Update to hugo master branch
+</span><span class="c1"></span><span class="nb">cd</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">GOPATH</span><span class="si">}</span><span class="s2">/src/</span><span class="si">${</span><span class="nv">hugo_src</span><span class="si">}</span><span class="s2">&#34;</span> <span class="o">||</span> <span class="nb">exit</span>
+
+git fetch --all <span class="c1"># fetch new branch names if any
+</span><span class="c1"></span>git checkout master
+<span class="c1"># git fetch --all
+</span><span class="c1"># Force update the vendor file in case it got changed
+</span><span class="c1"></span>git reset --hard origin/master
+
+<span class="c1"># Synchronize all the dependent packages as per the just updated vendor file
+</span><span class="c1"></span>govendor sync
+
+<span class="c1"># Update dependent packages from their master branches
+</span><span class="c1"># govendor fetch github.com/chaseadamsio/goorgeous
+</span><span class="c1"># govendor fetch github.com/chaseadamsio/goorgeous@=fixNewlineParagraphs
+</span><span class="c1"></span>
+<span class="c1"># Tue Sep 26 11:28:47 EDT 2017 - kmodi
+</span><span class="c1"># Turns out that the chroma package contains sub-packages too.. so have to
+</span><span class="c1"># include all separately.
+</span><span class="c1"># govendor fetch ${chroma_src}
+</span><span class="c1"># govendor fetch ${chroma_src}/formatters
+</span><span class="c1"># govendor fetch ${chroma_src}/formatters/html
+</span><span class="c1"># govendor fetch ${chroma_src}/lexers
+</span><span class="c1"># govendor fetch ${chroma_src}/styles
+</span><span class="c1"></span>
+<span class="c1"># https://discourse.gohugo.io/t/building-hugo-with-the-latest-version-of-chroma/8543/2?u=kaushalmodi
+</span><span class="c1"></span>go get -u -v <span class="si">${</span><span class="nv">chroma_src</span><span class="si">}</span>/...
+<span class="c1"># make vendor
+</span><span class="c1"></span>rm -rf <span class="s2">&#34;</span><span class="si">${</span><span class="nv">GOPATH</span><span class="si">}</span><span class="s2">/src/</span><span class="si">${</span><span class="nv">hugo_src</span><span class="si">}</span><span class="s2">/vendor/</span><span class="si">${</span><span class="nv">chroma_src</span><span class="si">}</span><span class="s2">&#34;</span>
+
+<span class="nv">hugo_commithash</span><span class="o">=</span><span class="k">$(</span>git rev-parse --short HEAD <span class="m">2</span>&gt;/dev/null<span class="k">)</span>
+<span class="nv">chroma_commithash</span><span class="o">=</span><span class="k">$(</span><span class="nb">cd</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">GOPATH</span><span class="si">}</span><span class="s2">/src/</span><span class="si">${</span><span class="nv">chroma_src</span><span class="si">}</span><span class="s2">&#34;</span> <span class="o">&amp;&amp;</span> git rev-parse --short HEAD <span class="m">2</span>&gt;/dev/null<span class="k">)</span>
+<span class="nv">builddate</span><span class="o">=</span><span class="k">$(</span>date +%FT%T%z<span class="k">)</span>
+
+go install -v <span class="se">\
+</span><span class="se"></span>   -ldflags <span class="s2">&#34;-X </span><span class="si">${</span><span class="nv">hugo_src</span><span class="si">}</span><span class="s2">/hugolib.CommitHash=</span><span class="si">${</span><span class="nv">hugo_commithash</span><span class="si">}</span><span class="s2">:chroma-</span><span class="si">${</span><span class="nv">chroma_commithash</span><span class="si">}</span><span class="s2"> \
+</span><span class="s2">             -X </span><span class="si">${</span><span class="nv">hugo_src</span><span class="si">}</span><span class="s2">/hugolib.BuildDate=</span><span class="si">${</span><span class="nv">builddate</span><span class="si">}</span><span class="s2">&#34;</span> <span class="se">\
+</span><span class="se"></span>   <span class="si">${</span><span class="nv">hugo_src</span><span class="si">}</span>
+
+<span class="nb">cd</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">here</span><span class="si">}</span><span class="s2">&#34;</span> <span class="o">||</span> exit</code></pre></div>
+<h2 id="deficiencies">Deficiencies</h2>
+
+<h3 id="path-names-are-defined-multiple-places">Path names are defined multiple places</h3>
+
+<p>I have not yet found a way to make org-babel reference a single common
+root directory. I can set <code>:dir</code> in the parent tree, but I can&rsquo;t seem
+to append a filename on to the end of it or reference a variable in
+that context. So just be aware that (for now) you have to search and
+replace <code>~/git/rymcg.tech/</code> to your directory structure, at multiple
+places in this file (and there may be other things, I expect you to be
+the type of person who <strong>reads</strong> code before running it&hellip;..)</p>
+
+<h3 id="my-netlify-deploy-is-pure-static-files">My netlify deploy is pure static files</h3>
+
+<p>I have my .gitignore setup to ignore commiting anything but this file
+(blog.org) and the <code>public</code> directory. Eventually I want the server to
+build the site, but only after hugo development cycle settles down and
+they install a good version for things like syntax highlighing
+properly. I&rsquo;m guessing there&rsquo;s some orchestation possible to get the
+master versions, as in the script in the Dependencies, but I figure
+it&rsquo;s easier to just wait a few days..</p>
+
+<h2 id="install">Install</h2>
+
+<ul>
+<li>Put <a href="https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org">blog.org</a> in your <code>~/.emacs.d</code>.</li>
+<li>Put this in your own init to bootstrap:</li>
+</ul>
+
+<div class='block-header example'>Example</div>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">(let ((blog-init (expand-file-name &#34;~/.emacs.d/blog.el&#34;)))
+  (if (file-exists-p blog-init)
+    (load-file blog-init)))</code></pre></div>
 <h2 id="ox-hugo">ox-hugo</h2>
 
 <p>This is the main config, it configures ox-hugo, initializes our blog
 directory, and sets up hugo server to run inside an Emacs eshell.</p>
 
 <div class='block-header fn'>Create in ~/.emacs.d/blog.el</div>
-<div class="highlight"><pre class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">defun</span> <span class="nv">rymcg/org-babel-eval-blocks-in-file</span> <span class="p">(</span><span class="nv">filepath</span> <span class="nv">block-list</span><span class="p">)</span>
-  <span class="s">&#34;Open an Org file and eval a list of named code blocks in it&#34;</span>
-  <span class="p">(</span><span class="nb">save-window-excursion</span>
-    <span class="p">(</span><span class="nv">find-file</span> <span class="nv">filepath</span><span class="p">)</span>
-    <span class="p">(</span><span class="nb">dolist</span> <span class="p">(</span><span class="nv">codeblock</span> <span class="nv">block-list</span><span class="p">)</span>
-      <span class="p">(</span><span class="nv">org-babel-goto-named-src-block</span> <span class="nv">codeblock</span><span class="p">)</span>
-      <span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">org-confirm-babel-evaluate</span> <span class="no">nil</span><span class="p">))</span>
-        <span class="p">(</span><span class="nv">org-babel-execute-src-block-maybe</span><span class="p">)))))</span>
-
-<span class="p">(</span><span class="nb">use-package</span> <span class="nv">ox-hugo</span>
+<div class="highlight"><pre class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">use-package</span> <span class="nv">ox-hugo</span>
   <span class="nb">:ensure</span> <span class="no">t</span>
   <span class="nb">:after</span> <span class="nv">ox</span>
   <span class="nb">:init</span>
@@ -249,12 +348,22 @@ directory, and sets up hugo server to run inside an Emacs eshell.</p>
   <span class="p">(</span><span class="nb">setq</span> <span class="nv">my/hugo-root</span> <span class="p">(</span><span class="nf">expand-file-name</span> <span class="s">&#34;~/git/rymcg.tech/blog&#34;</span><span class="p">))</span>
   <span class="p">(</span><span class="nb">setq</span> <span class="nv">my/hugo-server-url</span> <span class="s">&#34;http://localhost:1313&#34;</span><span class="p">)</span>
 
+  <span class="c1">; blog related functions defined inside of use-package&#39; =:init= conveniently</span>
+  <span class="c1">; dissappear from your system if the package install fails. So I kind of like that,</span>
   <span class="p">(</span><span class="nb">defun</span> <span class="nv">blog-init</span> <span class="p">()</span>
     <span class="c1">; Tangle all files:</span>
     <span class="p">(</span><span class="nv">org-babel-tangle-file</span> <span class="nv">my/blog-file</span><span class="p">)</span>
     <span class="c1">; Create theme files if necessary:</span>
-    <span class="p">(</span><span class="nv">rymcg/org-babel-eval-blocks-in-file</span> <span class="nv">my/blog-file</span> <span class="o">&#39;</span><span class="p">(</span><span class="s">&#34;hugo-import-theme&#34;</span><span class="p">)))</span>
-  <span class="p">(</span><span class="nv">blog-init</span><span class="p">)</span>
+    <span class="p">((</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">filepath</span> <span class="nv">block-list</span><span class="p">)</span>
+             <span class="s">&#34;Open an Org file and eval a list of named code blocks in it&#34;</span>
+             <span class="p">(</span><span class="nb">save-window-excursion</span>
+               <span class="p">(</span><span class="nv">find-file</span> <span class="nv">filepath</span><span class="p">)</span>
+               <span class="p">(</span><span class="nb">dolist</span> <span class="p">(</span><span class="nv">codeblock</span> <span class="nv">block-list</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nv">org-babel-goto-named-src-block</span> <span class="nv">codeblock</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">org-confirm-babel-evaluate</span> <span class="no">nil</span><span class="p">))</span>
+                   <span class="p">(</span><span class="nv">org-babel-execute-src-block-maybe</span><span class="p">)))))</span>
+     <span class="nv">my/blog-file</span> <span class="o">&#39;</span><span class="p">(</span><span class="s">&#34;hugo-import-theme&#34;</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nv">blog-init</span><span class="p">)</span>
 
   <span class="p">(</span><span class="nb">defun</span> <span class="nv">hugo-server-start</span> <span class="p">()</span>
     <span class="s">&#34;Start hugo server in an inferior shell&#34;</span>

@@ -26,9 +26,77 @@ My configuration consists of:
 - [[https://www.gnu.org/software/emacs/][Emacs]] 25
 - [[https://www.gnu.org/software/emacs/][Org Mode]] 9 from the [[http://orgmode.org/elpa.html][project repos]]
 - [[https://gohugo.io/][Hugo]] git:master
- - I'm using a [[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][dev build using this script]], until [[https://github.com/alecthomas/chroma/commit/cbc3d5b9f01cbd0113748fa12d9d0cb9cfdda537][this fix is in]].
+ - I'm using a dev build with [[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][kaushalmodi's script]] 
+  - Watch out, I hardcoded a GOPATH:
 
-Install Emacs, org-mode, and hugo, by following the links above.
+#+BEGIN_SRC shell
+# /home/kmodi/go.apps/src/github.com/gohugoio/hugo/README.md
+# http://matthewkwilliams.com/index.php/2014/09/28/go-executables-are-statically-linked-except-when-they-are-not/
+
+here=$(pwd)
+
+hugo_src="github.com/gohugoio/hugo"
+chroma_src="github.com/alecthomas/chroma"
+
+export GOPATH="~/git/rymcg.tech/blog/"
+export CGO_ENABLED=0
+export GO_EXTLINK_ENABLED=0
+
+# https://discuss.gohugo.io/t/started-getting-failed-to-normalize-url-string-returning-in/5034/7?u=kaushalmodi
+# Do govendor sync to prevent issues like this: https://github.com/gohugoio/hugo/issues/2919
+if ! hash govendor 2>/dev/null
+then
+    go get -u -v github.com/kardianos/govendor
+fi
+
+# Install hugo for the first time so that the ${GOPATH}/src/${hugo_src}
+# directory gets populated.
+if [[ ! -d "${GOPATH}/src/${hugo_src}" ]] || ( ! hash hugo 2>/dev/null )
+then
+    go get -u -v ${hugo_src}
+fi
+
+# Update to hugo master branch
+cd "${GOPATH}/src/${hugo_src}" || exit
+
+git fetch --all # fetch new branch names if any
+git checkout master
+# git fetch --all
+# Force update the vendor file in case it got changed
+git reset --hard origin/master
+
+# Synchronize all the dependent packages as per the just updated vendor file
+govendor sync
+
+# Update dependent packages from their master branches
+# govendor fetch github.com/chaseadamsio/goorgeous
+# govendor fetch github.com/chaseadamsio/goorgeous@=fixNewlineParagraphs
+
+# Tue Sep 26 11:28:47 EDT 2017 - kmodi
+# Turns out that the chroma package contains sub-packages too.. so have to
+# include all separately.
+# govendor fetch ${chroma_src}
+# govendor fetch ${chroma_src}/formatters
+# govendor fetch ${chroma_src}/formatters/html
+# govendor fetch ${chroma_src}/lexers
+# govendor fetch ${chroma_src}/styles
+
+# https://discourse.gohugo.io/t/building-hugo-with-the-latest-version-of-chroma/8543/2?u=kaushalmodi
+go get -u -v ${chroma_src}/...
+# make vendor
+rm -rf "${GOPATH}/src/${hugo_src}/vendor/${chroma_src}"
+
+hugo_commithash=$(git rev-parse --short HEAD 2>/dev/null)
+chroma_commithash=$(cd "${GOPATH}/src/${chroma_src}" && git rev-parse --short HEAD 2>/dev/null)
+builddate=$(date +%FT%T%z)
+
+go install -v \
+   -ldflags "-X ${hugo_src}/hugolib.CommitHash=${hugo_commithash}:chroma-${chroma_commithash} \
+             -X ${hugo_src}/hugolib.BuildDate=${builddate}" \
+   ${hugo_src}
+
+cd "${here}" || exit
+#+END_SRC
 
 ** Deficiencies
 *** Path names are defined multiple places
@@ -42,23 +110,26 @@ the type of person who *reads* code before running it.....)
 *** My netlify deploy is pure static files
 I have my .gitignore setup to ignore commiting anything but this file
 (blog.org) and the =public= directory. Eventually I want the server to
-build the site, but after hugo development settles and they install a
-good version for things like syntax highlighing properly...
+build the site, but only after hugo development cycle settles down and
+they install a good version for things like syntax highlighing
+properly. I'm guessing there's some orchestation possible to get the
+master versions, as in the script in the Dependencies, but I figure
+it's easier to just wait a few days.. 
+
+** Install
+ - Put [[https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org][blog.org]] in your =~/.emacs.d=. 
+ - Put this in your own init to bootstrap:
+#+BEGIN_EXAMPLE emacs-lisp
+(let ((blog-init (expand-file-name "~/.emacs.d/blog.el")))
+  (if (file-exists-p blog-init)
+    (load-file blog-init)))
+#+END_EXAMPLE
+
 ** ox-hugo
 This is the main config, it configures ox-hugo, initializes our blog
 directory, and sets up hugo server to run inside an Emacs eshell.
 
-#+NAME: ox-hugo-init
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.el
-(defun rymcg/org-babel-eval-blocks-in-file (filepath block-list)
-  "Open an Org file and eval a list of named code blocks in it"
-  (save-window-excursion
-    (find-file filepath)
-    (dolist (codeblock block-list)
-      (org-babel-goto-named-src-block codeblock)
-      (let ((org-confirm-babel-evaluate nil))
-        (org-babel-execute-src-block-maybe)))))
-
 (use-package ox-hugo
   :ensure t
   :after ox
@@ -68,14 +139,24 @@ directory, and sets up hugo server to run inside an Emacs eshell.
   (setq my/blog-file (expand-file-name "~/git/rymcg.tech/blog.org"))
   (setq my/hugo-root (expand-file-name "~/git/rymcg.tech/blog"))
   (setq my/hugo-server-url "http://localhost:1313")
-  
+
+  ; blog related functions defined inside of use-package' =:init= conveniently
+  ; dissappear from your system if the package install fails. So I kind of like that, 
   (defun blog-init ()
     ; Tangle all files:
     (org-babel-tangle-file my/blog-file)
     ; Create theme files if necessary:
-    (rymcg/org-babel-eval-blocks-in-file my/blog-file '("hugo-import-theme")))
-  (blog-init)
-
+    ((lambda (filepath block-list)
+             "Open an Org file and eval a list of named code blocks in it"
+             (save-window-excursion
+               (find-file filepath)
+               (dolist (codeblock block-list)
+                 (org-babel-goto-named-src-block codeblock)
+                 (let ((org-confirm-babel-evaluate nil))
+                   (org-babel-execute-src-block-maybe)))))
+     my/blog-file '("hugo-import-theme")))
+    (blog-init)
+    
   (defun hugo-server-start ()
     "Start hugo server in an inferior shell"
     (interactive)
