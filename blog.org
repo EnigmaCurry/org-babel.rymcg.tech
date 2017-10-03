@@ -564,15 +564,20 @@ HTML.
           (goto-char (org-element-property :begin src)) 
           (let ((tangled-name (cdr (assoc :tangle (nth 2 (org-babel-get-src-block-info)))))
                 (directory (cdr (assoc :dir (nth 2 (org-babel-get-src-block-info)))))
-                (language-name (first (org-babel-get-src-block-info))))
+                (language-name (first (org-babel-get-src-block-info)))
+                (code-block-name (nth 4 (org-babel-get-src-block-info))))
             (if (not (equal tangled-name "no"))
                                         ; tangle files get a header for the file name:
                 (insert (format "\n#+HTML: <div class='block-header fn'>Create in %s</div>\n" tangled-name))
               (if (equal language-name "shell")
                                         ; Non-tangled shell scripts get a header indicating to run it:
                                         ; Show the directory if it's set:
-                  (insert (format "\n#+HTML: <div class='block-header exec'>Run%s</div>\n" 
-                                  (if (equal directory nil) "" (format " in %s" directory)))))))))
+                  (insert (concat "\n#+HTML: <div class='block-header exec'>"
+                                  (if (> (length code-block-name) 0)
+                                      (format "%s - " code-block-name))
+                                  "Run"
+                                  (if (equal directory nil) "" (format " in %s" directory))
+                                  "</div>\n")))))))
   (let ((example-blocks (org-element-map (org-element-parse-buffer) 'example-block #'identity)))
     (setq example-blocks (nreverse example-blocks))
     (loop for example in example-blocks
@@ -608,7 +613,8 @@ HTML.
               (beginning-of-line)
               (kill-region beg (point)))
             (insert (format (concat "<div class=\"block-header results\">"
-                                    "Output - Last run: %s</div>\n")
+                                    code-block-name
+                                    " - Last run: %s</div>\n")
                             (format-time-string "%F %r")))
             (insert (format (concat "<div class=\"block-results\" "
                                     "id=\"results-%s\"><pre class=\"chroma\">\n") 
@@ -642,11 +648,9 @@ whoami
 ls
 #+END_SRC
 
-Results and timestamp are exported to HTML each time the block is re-evaluated:
-
 #+RESULTS: testguy
 #+BEGIN_EXPORT html
-<div class="block-header results">Output - Last run: 2017-10-03 01:40:47 PM</div>
+<div class="block-header results">testguy - Last run: 2017-10-03 03:15:59 PM</div>
 <div class="block-results" id="results-testguy"><pre class="chroma">
 ryan
 ~
@@ -654,6 +658,9 @@ blog
 blog.org
 </pre></div>
 #+END_EXPORT
+
+Results and timestamp are exported to HTML each time the block is re-evaluated:
+
 
 * Front Page
 :PROPERTIES:

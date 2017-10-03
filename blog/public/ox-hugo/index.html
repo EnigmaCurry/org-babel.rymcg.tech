@@ -521,7 +521,7 @@ mediaTypes:
 <div class="highlight"><pre class="chroma"><code class="language-markdown" data-lang="markdown">rymcg.tech</code></pre></div>
 <p>Import the theme:</p>
 
-<div class='block-header exec'>Run in ~/git/rymcg.tech/blog</div>
+<div class='block-header exec'>hugo-import-theme - Run in ~/git/rymcg.tech/blog</div>
 <div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="k">if</span> <span class="o">[</span> ! -d themes/docdock <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
     mkdir -p themes
     git submodule add -f https://github.com/EnigmaCurry/hugo-theme-docdock themes/docdock
@@ -788,15 +788,20 @@ HTML.</p>
           <span class="p">(</span><span class="nf">goto-char</span> <span class="p">(</span><span class="nv">org-element-property</span> <span class="nb">:begin</span> <span class="nv">src</span><span class="p">))</span>
           <span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">tangled-name</span> <span class="p">(</span><span class="nf">cdr</span> <span class="p">(</span><span class="nf">assoc</span> <span class="nb">:tangle</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">2</span> <span class="p">(</span><span class="nv">org-babel-get-src-block-info</span><span class="p">)))))</span>
                 <span class="p">(</span><span class="nv">directory</span> <span class="p">(</span><span class="nf">cdr</span> <span class="p">(</span><span class="nf">assoc</span> <span class="nb">:dir</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">2</span> <span class="p">(</span><span class="nv">org-babel-get-src-block-info</span><span class="p">)))))</span>
-                <span class="p">(</span><span class="nv">language-name</span> <span class="p">(</span><span class="nv">first</span> <span class="p">(</span><span class="nv">org-babel-get-src-block-info</span><span class="p">))))</span>
+                <span class="p">(</span><span class="nv">language-name</span> <span class="p">(</span><span class="nv">first</span> <span class="p">(</span><span class="nv">org-babel-get-src-block-info</span><span class="p">)))</span>
+                <span class="p">(</span><span class="nv">code-block-name</span> <span class="p">(</span><span class="nf">nth</span> <span class="mi">4</span> <span class="p">(</span><span class="nv">org-babel-get-src-block-info</span><span class="p">))))</span>
             <span class="p">(</span><span class="nb">if</span> <span class="p">(</span><span class="nv">not</span> <span class="p">(</span><span class="nf">equal</span> <span class="nv">tangled-name</span> <span class="s">&#34;no&#34;</span><span class="p">))</span>
                                         <span class="c1">; tangle files get a header for the file name:</span>
                 <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">format</span> <span class="s">&#34;\n#+HTML: &lt;div class=&#39;block-header fn&#39;&gt;Create in %s&lt;/div&gt;\n&#34;</span> <span class="nv">tangled-name</span><span class="p">))</span>
               <span class="p">(</span><span class="nb">if</span> <span class="p">(</span><span class="nf">equal</span> <span class="nv">language-name</span> <span class="s">&#34;shell&#34;</span><span class="p">)</span>
                                         <span class="c1">; Non-tangled shell scripts get a header indicating to run it:</span>
                                         <span class="c1">; Show the directory if it&#39;s set:</span>
-                  <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">format</span> <span class="s">&#34;\n#+HTML: &lt;div class=&#39;block-header exec&#39;&gt;Run%s&lt;/div&gt;\n&#34;</span>
-                                  <span class="p">(</span><span class="nb">if</span> <span class="p">(</span><span class="nf">equal</span> <span class="nv">directory</span> <span class="no">nil</span><span class="p">)</span> <span class="s">&#34;&#34;</span> <span class="p">(</span><span class="nf">format</span> <span class="s">&#34; in %s&#34;</span> <span class="nv">directory</span><span class="p">)))))))))</span>
+                  <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;\n#+HTML: &lt;div class=&#39;block-header exec&#39;&gt;&#34;</span>
+                                  <span class="p">(</span><span class="nb">if</span> <span class="p">(</span><span class="nf">&gt;</span> <span class="p">(</span><span class="nf">length</span> <span class="nv">code-block-name</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+                                      <span class="p">(</span><span class="nf">format</span> <span class="s">&#34;%s - &#34;</span> <span class="nv">code-block-name</span><span class="p">))</span>
+                                  <span class="s">&#34;Run&#34;</span>
+                                  <span class="p">(</span><span class="nb">if</span> <span class="p">(</span><span class="nf">equal</span> <span class="nv">directory</span> <span class="no">nil</span><span class="p">)</span> <span class="s">&#34;&#34;</span> <span class="p">(</span><span class="nf">format</span> <span class="s">&#34; in %s&#34;</span> <span class="nv">directory</span><span class="p">))</span>
+                                  <span class="s">&#34;&lt;/div&gt;\n&#34;</span><span class="p">)))))))</span>
   <span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">example-blocks</span> <span class="p">(</span><span class="nv">org-element-map</span> <span class="p">(</span><span class="nv">org-element-parse-buffer</span><span class="p">)</span> <span class="ss">&#39;example-block</span> <span class="nf">#&#39;identity</span><span class="p">)))</span>
     <span class="p">(</span><span class="nb">setq</span> <span class="nv">example-blocks</span> <span class="p">(</span><span class="nf">nreverse</span> <span class="nv">example-blocks</span><span class="p">))</span>
     <span class="p">(</span><span class="nb">loop</span> <span class="nv">for</span> <span class="nv">example</span> <span class="nv">in</span> <span class="nv">example-blocks</span>
@@ -831,7 +836,8 @@ HTML.</p>
               <span class="p">(</span><span class="nf">beginning-of-line</span><span class="p">)</span>
               <span class="p">(</span><span class="nv">kill-region</span> <span class="nv">beg</span> <span class="p">(</span><span class="nf">point</span><span class="p">)))</span>
             <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">format</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;&lt;div class=\&#34;block-header results\&#34;&gt;&#34;</span>
-                                    <span class="s">&#34;Output - Last run: %s&lt;/div&gt;\n&#34;</span><span class="p">)</span>
+                                    <span class="nv">code-block-name</span>
+                                    <span class="s">&#34; - Last run: %s&lt;/div&gt;\n&#34;</span><span class="p">)</span>
                             <span class="p">(</span><span class="nf">format-time-string</span> <span class="s">&#34;%F %r&#34;</span><span class="p">)))</span>
             <span class="p">(</span><span class="nf">insert</span> <span class="p">(</span><span class="nf">format</span> <span class="p">(</span><span class="nf">concat</span> <span class="s">&#34;&lt;div class=\&#34;block-results\&#34; &#34;</span>
                                     <span class="s">&#34;id=\&#34;results-%s\&#34;&gt;&lt;pre class=\&#34;chroma\&#34;&gt;\n&#34;</span><span class="p">)</span>
@@ -874,18 +880,18 @@ on export. It has to be manually run.</li>
 </ul></li>
 </ul>
 
-<div class='block-header exec'>Run</div>
+<div class='block-header exec'>testguy - Run</div>
 <div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">whoami
 ls</code></pre></div>
-<p>Results and timestamp are exported to HTML each time the block is re-evaluated:</p>
-
-<div class="block-header results">Output - Last run: 2017-10-03 01:40:47 PM</div>
+<div class="block-header results">testguy - Last run: 2017-10-03 03:15:59 PM</div>
 <div class="block-results" id="results-testguy"><pre class="chroma">
 ryan
 ~
 blog
 blog.org
 </pre></div>
+
+<p>Results and timestamp are exported to HTML each time the block is re-evaluated:</p>
 
 
 <footer class=" footline" >
