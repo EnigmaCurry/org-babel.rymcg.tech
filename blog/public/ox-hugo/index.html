@@ -320,25 +320,34 @@ go install -v <span class="se">\
 <h2 id="install">Install</h2>
 
 <ul>
-<li>Download <a href="https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org">blog.org</a> to your <code>~/.emacs.d</code>.</li>
-<li>Put this in your own <code>~/.emacs.d/{init.el,config.org}</code>:</li>
+<li>Create a new repository. I create mine in <code>~/git/rymcg.tech</code>:</li>
 </ul>
-<div class="highlight"><pre class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">let</span> <span class="p">((</span><span class="nv">blog-init</span> <span class="p">(</span><span class="nf">expand-file-name</span> <span class="s">&#34;~/.emacs.d/blog.el&#34;</span><span class="p">)))</span>
-  <span class="p">(</span><span class="nb">if</span> <span class="p">(</span><span class="nf">file-exists-p</span> <span class="nv">blog-init</span><span class="p">)</span>
-    <span class="p">(</span><span class="nv">load-file</span> <span class="nv">blog-init</span><span class="p">)))</span></code></pre></div>
+
+<div class='block-header exec'>Run</div>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">git init ~/git/rymcg.tech</code></pre></div>
+<ul>
+<li>Download <a href="https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org">blog.org</a>, saving it to your new repository in
+<code>~/git/rymcg.tech</code>.</li>
+<li>Use this code in your Emacs init file:</li>
+</ul>
+
+<div class='block-header example'>Example</div>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">(let ((blog-init (expand-file-name &#34;~/.emacs.d/blog.el&#34;)))
+  (if (file-exists-p blog-init)
+    (load-file blog-init)))</code></pre></div>
 <ul>
 <li>(Don&rsquo;t worry, blog.el is taken care of in the next part.)</li>
 </ul>
 
 <h2 id="run">Run!</h2>
 
-<p>These are the manual steps for building the website. Later on we&rsquo;ll
-build up a script to automate all this, so all though the next bit is
-a bit tedious, this should be much clearer conceptually how this thing
-works:</p>
+<p>These are the manual steps for building the website directly from
+org-mode. Later on we&rsquo;ll build up a script to automate all this. So,
+although these steps are a bit tedious, this should make it easier to
+conceptualize what this thing does:</p>
 
 <ul>
-<li>Open up your new <code>~/.emacs.d/blog.org</code>, in Emacs.</li>
+<li>Open up your copy of <code>blog.org</code>, in Emacs.</li>
 <li>If you installed org-mode correctly, all should be true:
 
 <ul>
@@ -348,28 +357,50 @@ in <code>.org</code>.</li>
 <li><code>M-x org-version</code> should say something like 9.1 or higher.</li>
 </ul></li>
 <li>Search and replace all the <code>~/git/rymcg.tech</code> directory references
-to make them your own local website git clone. (See caveat in
-<a href="#orga8dffee">2</a>.)</li>
+to the path of your local website checkout.</li>
 <li>Save the file. It&rsquo;s yours, remeber!</li>
-<li>Now tangle all the org-babel code blocks: (aka. &lsquo;render all code blocks
+<li>Tangle all the org-babel code blocks: (aka. &lsquo;render all code blocks
 marked with <code>:tangle</code> to the specified external file.&lsquo;)
 
 <ul>
-<li>Type <code>=C-c C-v t=</code> (or <code>M-x org-babel-tangle</code>)</li>
+<li>Type <code>C-c C-v t</code> (or <code>M-x org-babel-tangle</code>)</li>
+<li>This creates <code>~/.emacs.d/blog.el</code></li>
 </ul></li>
-<li>Now run ox-hugo to export to markdown:
+<li>Restart Emacs to reload the config.</li>
+</ul>
+
+<p>Steps to run each time you want to publish <code>blog.org</code>:</p>
 
 <ul>
-<li>Type <code>=C-c C-e H A=</code> (or <code>C-1 M-x org-hugo-export-subtree-to-md</code>)</li>
+<li>Run ox-hugo to export to markdown:
+
+<ul>
+<li>Type <code>C-c C-e H A</code> (or <code>C-1 M-x org-hugo-export-subtree-to-md</code>)</li>
 </ul></li>
-<li>Now run hugo to translate the markdown to the public html:
+<li>Optionally re-tangle config files, <code>C-c C-v t</code>
+
+<ul>
+<li>(You only really have to run this when you change blocks with <code>:tangle</code>)</li>
+</ul></li>
+<li>Run hugo to translate the markdown to the public html:
 
 <ul>
 <li>Type <code>M-x eshell-command RET bash -c 'cd ~/git/rymcg.tech/blog; ./go/bin/hugo'</code></li>
 <li>That last one I was kidding.</li>
 <li>I just open a terminal in <code>~/git/rymcg.tech/blog</code> and run <code>./go/bin/hugo</code>.</li>
 </ul></li>
+<li>Run the embedded hugo server:
+
+<ul>
+<li>Type <code>M-x hugo-server-start</code>.</li>
+<li>The site should automatically open in your browser.</li>
+<li>If you have a <a href="http://livereload.com/extensions/">live reload extension</a> installed, the site should
+refresh automatically when you make changes.</li>
+<li>Configure <code>browse-url-browser-function</code> if it opens in the wrong browser.</li>
+</ul></li>
 </ul>
+
+<p>Seriously, this needs automation. Stat.</p>
 
 <h2 id="ox-hugo">ox-hugo</h2>
 
