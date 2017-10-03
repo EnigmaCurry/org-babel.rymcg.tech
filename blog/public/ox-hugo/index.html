@@ -438,11 +438,7 @@ browser.</li>
 directory, and sets up hugo server to run inside an Emacs eshell.</p>
 
 <div class='block-header fn'>Create in ~/.emacs.d/blog.el</div>
-<div class="highlight"><pre class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">use-package</span> <span class="nv">org-babel-eval-in-repl</span>
-  <span class="nb">:ensure</span> <span class="no">t</span>
-  <span class="nb">:init</span>
-  <span class="p">(</span><span class="nb">require</span> <span class="ss">&#39;eval-in-repl-shell</span><span class="p">))</span>
-<span class="p">(</span><span class="nb">use-package</span> <span class="nv">ox-hugo</span>
+<div class="highlight"><pre class="chroma"><code class="language-emacs-lisp" data-lang="emacs-lisp"><span class="p">(</span><span class="nb">use-package</span> <span class="nv">ox-hugo</span>
   <span class="nb">:ensure</span> <span class="no">t</span>
   <span class="nb">:after</span> <span class="nv">ox</span>
   <span class="nb">:init</span>

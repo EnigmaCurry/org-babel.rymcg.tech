@@ -202,10 +202,6 @@ This is the main config, it configures ox-hugo, initializes our blog
 directory, and sets up hugo server to run inside an Emacs eshell.
 
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.el
-(use-package org-babel-eval-in-repl
-  :ensure t
-  :init
-  (require 'eval-in-repl-shell))
 (use-package ox-hugo
   :ensure t
   :after ox
