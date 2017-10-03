@@ -695,19 +695,17 @@ whoami
 ls
 #+END_SRC
 
+Results and timestamp are exported to HTML each time the block is re-evaluated:
+
 #+RESULTS: testguy
 #+BEGIN_EXPORT html
-<div class="block-header results">testguy - Last run: 2017-10-03 03:15:59 PM</div>
+<div class="block-header results">testguy - Last run: 2017-10-03 06:38:02 PM</div>
 <div class="block-results" id="results-testguy"><pre class="chroma">
 ryan
-~
 blog
 blog.org
 </pre></div>
 #+END_EXPORT
-
-Results and timestamp are exported to HTML each time the block is re-evaluated:
-
 
 * Front Page
 :PROPERTIES:
