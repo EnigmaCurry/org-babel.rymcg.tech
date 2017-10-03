@@ -16,9 +16,32 @@ could recreate it from nothing but this file (plus any static assets,
 images, etc.)
 
 This is a self-documenting deployment environment, using a literate
-programming style written with [[http://org-babel.readthedocs.io][org-babel]] code blocks. Download the [[https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org][org
-source file]] and you can edit it to make any customizations, and build
-your own website just like this one.
+programming style written with [[http://org-babel.readthedocs.io][org-babel]] code blocks. You are free to
+copy this file, or any portion of it, subject to the regular MIT
+license:
+
+** License
+#+BEGIN_QUOTE
+Copyright (c) 2017 EnigmaCurry - http://blog.rymcg.tech/ox-hugo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+#+END_QUOTE
 
 ** Dependencies
 My configuration consists of:
@@ -26,7 +49,15 @@ My configuration consists of:
 - [[https://www.gnu.org/software/emacs/][Emacs]] 25
 - [[https://www.gnu.org/software/emacs/][Org Mode]] 9 from the [[http://orgmode.org/elpa.html][project repos]]
 - [[https://gohugo.io/][Hugo]] git:master
-
+- [[https://raw.githubusercontent.com/EnigmaCurry/rymcg.tech/master/blog.org][This
+Org file]]
+ - Which is the same thing as what's at http://blog.rymcg.tech/ox-hugo
+  - The best rendered view is here.
+ - Which is the same thing as what's at https://github.com/enigmacurry/rymcg.tech
+  - Github renders Org syntax, but not as well as at rymcg.tech.
+ - Which is the same thing as what's at http://localhost:1313
+  - That is, it will be once you download this and try it out for
+    yourself in Emacs org-mode! 
 ** Deficiencies
  - *Path names are defined in multiple places*. I have not yet found a
    way to make org-babel reference a single common root directory. I
@@ -34,9 +65,9 @@ My configuration consists of:
    filename on to the end of it or reference a variable in that
    context. So just be aware that (for now) you have to search and
    replace =~/git/rymcg.tech/=, at multiple places in this file and
-   change them to your directory structure. (There may be other
-   things, I expect you to be the type of person who *reads* code
-   before running it.....)
+   change them to your directory structure. (There may be other things
+   to look out for. This is Literate Programming after all, you're
+   expected to 👓📚 *read* 📚👓 it.)
 
 ** Install dev version of hugo
 Currently I use the latest devolpment version of hugo, because I'm
