@@ -266,26 +266,30 @@ directory, and sets up hugo server to run inside an Emacs eshell.
   (defun blog-publish ()
     "Build and publish the blog to the public branch"
     (interactive)
-    (let ((default-directory my/blog-root))    
-      ; Check we're on the master branch:
-      (if (not (= 0 (call-process-shell-command 
-                     "[[ `git rev-parse --abbrev-ref HEAD` == \"master\" ]]")))
-          (message "Need to be on master branch to publish blog")
-        ; Tangle all files:
-        (org-babel-tangle-file my/blog-file)
-        ; Run ox-hugo to generate Markdown:
-        (org-hugo-export-subtree-to-md 1)
-        ; Run hugo to generate HTML:
-        (let ((default-directory my/hugo-root))
-          (call-process-shell-command "./go/bin/hugo"))
-        ; Check for uncommited changes:
-        (if (not (= 0 (call-process-shell-command "git diff-index --quiet HEAD --")))
-            (message "Need to commit changes before publishing.")
-          ; Delete public branch:
-          (call-process-shell-command (concat "git branch -D " my/hugo-public-branch))
-          ; Recreate public branch from scratch:
+    (if (not (equal (buffer-file-name (current-buffer)) my/blog-file))
+        (message "You can only do that in the active buffer of the blog")
+      (let ((default-directory my/blog-root))    
+        ; Check we're on the master branch:
+        (if (not (= 0 (call-process-shell-command 
+                       "[[ `git rev-parse --abbrev-ref HEAD` == \"master\" ]]")))
+            (message "Need to be on master branch to publish blog")
+          ; Tangle all files:
+          (org-babel-tangle-file my/blog-file)
+          ; Run ox-hugo to generate Markdown:
+          (org-hugo-export-subtree-to-md 1)
+          ; Run hugo to generate HTML:
+          (let ((default-directory my/hugo-root))
+            (call-process-shell-command "./go/bin/hugo"))
+          ; Check for uncommited changes:
           (if (not (= 0 (call-process-shell-command 
-                         (concat "git rev-parse --verify " my/hugo-public-branch))))
+                         "git diff-index --quiet HEAD --")))
+              (message "Need to commit changes before publishing.")
+            ; Delete public branch:
+            (call-process-shell-command (concat "git branch -D " 
+                                                my/hugo-public-branch))
+            ; Recreate public branch from scratch:
+            (if (not (= 0 (call-process-shell-command 
+                           (concat "git rev-parse --verify " my/hugo-public-branch))))
               (progn
                 (call-process-shell-command (concat "git checkout --orphan " 
                                                     my/hugo-public-branch))
@@ -300,12 +304,14 @@ directory, and sets up hugo server to run inside an Emacs eshell.
                 (call-process-shell-command "git add .gitignore")
                 (call-process-shell-command "git commit -m 'initial static html setup'")
                 ))
-          ; Commit generated HTML:
-          (call-process-shell-command "git add blog/public/* && git commit -m public")
-          ; Go back to master:
-          (call-process-shell-command "git checkout master")
-          ; Push
-          (call-process-shell-command (concat "git push -f origin " my/hugo-public-branch))))))
+            ; Commit generated HTML:
+            (call-process-shell-command "git add blog/public/* && git commit -m public")
+            ; Go back to master:
+            (call-process-shell-command "git checkout master")
+            ; Push
+            (call-process-shell-command (concat "git push -f origin " 
+                                                my/hugo-public-branch))
+            (message "Yay!"))))))
 
   (defun hugo-server-start ()
     "Start hugo server in an inferior shell"
