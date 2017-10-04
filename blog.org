@@ -74,7 +74,7 @@ waiting for recent bugfixes to make it into stable. Here is
 [[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][kaushalmodi's script]] with a few tweaks. (Watch out, I hardcoded
 $GOPATH)
 
-#+BEGIN_SRC sh :eval no-export :results none
+#+BEGIN_SRC shell :results none
 # /home/kmodi/go.apps/src/github.com/gohugoio/hugo/README.md
 # http://matthewkwilliams.com/index.php/2014/09/28/go-executables-are-statically-linked-except-when-they-are-not/
 
