@@ -247,75 +247,95 @@ directory, and sets up hugo server to run inside an Emacs eshell.
   (setq my/hugo-server-url "http://localhost:1313")
 
   ; blog related functions defined inside of use-package' =:init= conveniently
-  ; dissappear from your system if the package install fails. So I kind of like that, 
+  ; dissappear from your system if the package install fails. So I kind of like that.
   (defun blog-init ()
     ; Tangle all files:
     (org-babel-tangle-file my/blog-file)
     ; Create theme files if necessary:
     ((lambda (filepath block-list)
-             "Open an Org file and eval a list of named code blocks in it"
-             (save-window-excursion
-               (find-file filepath)
-               (dolist (codeblock block-list)
-                 (org-babel-goto-named-src-block codeblock)
-                 (let ((org-confirm-babel-evaluate nil))
-                   (org-babel-execute-src-block-maybe)))))
+       "Open an Org file and eval a list of named code blocks in it"
+       (save-window-excursion
+         (find-file filepath)
+         (dolist (codeblock block-list)
+           (org-babel-goto-named-src-block codeblock)
+           (let ((org-confirm-babel-evaluate nil))
+             (org-babel-execute-src-block-maybe)))))
      my/blog-file '("hugo-import-theme")))
   (blog-init)
   
-  (defun blog-publish ()
-    "Build and publish the blog to the public branch"
-    (interactive)
-    (if (not (equal (buffer-file-name (current-buffer)) my/blog-file))
-        (message "You can only do that in the active buffer of the blog")
-      (let ((default-directory my/blog-root))    
-        ; Check we're on the master branch:
-        (if (not (= 0 (call-process-shell-command 
-                       "[[ `git rev-parse --abbrev-ref HEAD` == \"master\" ]]")))
-            (message "Need to be on master branch to publish blog")
-          ; Tangle all files:
-          (org-babel-tangle-file my/blog-file)
-          ; Run ox-hugo to generate Markdown:
-          (org-hugo-export-subtree-to-md 1)
-          ; Run hugo to generate HTML:
-          (let ((default-directory my/hugo-root))
-            (call-process-shell-command "./go/bin/hugo"))
-          ; Check for uncommited changes:
-          (if (not (= 0 (call-process-shell-command 
-                         "git diff-index --quiet HEAD --")))
-              (message "Need to commit changes before publishing.")
-            ; Delete public branch:
-            (call-process-shell-command (concat "git branch -D " 
+  (defun blog-publish (keep-branch)
+    "Build and publish the blog to the public branch.
+
+    If keep-branch is non nil, make a new commit on an existing
+    branch. Otherwise blog-publish will delete the old branch and
+    create a new branch each time.
+
+    I have no need to store the history of intermediary files, so I
+    delete the public branch everytime I publish and the only
+    commit in it is a snapshot of the current site. 
+
+    If this site gets big, I may want to not do that, because
+    I'll bet you get a lot more efficiency transferring a diff
+    than you do the entire contents of the site."
+    (interactive "P")
+    (unless (equal (buffer-file-name (current-buffer)) my/blog-file)
+      (error "You can only do that in the active buffer of the blog"))
+    (unless (= 0 (call-process-shell-command 
+                  "git diff-index --quiet HEAD --"))
+      (error "You need to commit your changes before publishing."))
+    (unless (= 0 (call-process-shell-command 
+                  "[[ `git rev-parse --abbrev-ref HEAD` == \"master\" ]]"))
+      (error "You need to start on the master branch"))
+    (let ((default-directory my/blog-root))
+      ; Tangle all files:
+      (org-babel-tangle-file my/blog-file)
+      ; Run ox-hugo to generate Markdown:
+      (org-hugo-export-subtree-to-md 1)
+      ; Run hugo to generate HTML:
+      (let ((default-directory my/hugo-root))
+        (unless (= 0 (call-process-shell-command "./go/bin/hugo"))
+          (error "hugo failed")))
+      (if (not keep-branch)
+          ; Delete public branch:
+          (call-process-shell-command (concat "git branch -D " 
+                                              my/hugo-public-branch)))
+      (if (/= 0 (call-process-shell-command 
+                 (concat "git rev-parse --verify " my/hugo-public-branch)))
+          (progn
+            ; Create a new branch in another dimension:
+            (call-process-shell-command (concat "git checkout --orphan " 
                                                 my/hugo-public-branch))
-            ; Recreate public branch from scratch:
-            (if (not (= 0 (call-process-shell-command 
-                           (concat "git rev-parse --verify " my/hugo-public-branch))))
-              (progn
-                (call-process-shell-command (concat "git checkout --orphan " 
-                                                    my/hugo-public-branch))
-                (call-process-shell-command "git rm --cached -r .") 
-                (call-process-shell-command (concat "echo -e '*\n"
-                                                    "!.gitignore\n"
-                                                    "!blog/\n"
-                                                    "!blog/public/\n"
-                                                    "!blog/public/*\n"
-                                                    "!blog/public/*/*\n"
-                                                    "' > .gitignore"))
-                (call-process-shell-command "git add .gitignore")
-                (call-process-shell-command "git commit -m 'initial static html setup'")
-                ))
-            ; Commit generated HTML:
-            (call-process-shell-command "git add blog/public/* && git commit -m public")
-            ; Go back to master:
-            (call-process-shell-command "git checkout master")
-            ; Push
-            (call-process-shell-command (concat "git push -f origin " 
-                                                my/hugo-public-branch))
-            (message "Yay!"))))))
+            ; Get rid of the klingons:
+            (call-process-shell-command "git rm --cached -r .") 
+            ; We only want to commit public site material:
+            (call-process-shell-command (concat "echo -e '*\n"
+                                                "!.gitignore\n"
+                                                "!blog/\n"
+                                                "!blog/public/\n"
+                                                "!blog/public/*\n"
+                                                "!blog/public/*/*\n"
+                                                "' > .gitignore"))
+            (call-process-shell-command "git add .gitignore")
+            (call-process-shell-command "git commit -m 'initial static html setup'"))
+        (unless (= 0 (call-process-shell-command (concat "git checkout " 
+                                                         my/hugo-public-branch)))
+          (error (concat "could not check out " my/hugo-public-branch " branch"))))
+      ; Commit static site files:
+      (unless (= 0 (call-process-shell-command "git add blog/public/* && git commit -m public"))
+        (error "commit failed"))
+      ; Go back to master:
+      (unless (= 0 (call-process-shell-command "git checkout master"))
+        (error "could not switch back to master branch!"))
+      ; Push
+      (message "git push ...")
+      (unless (= 0 (call-process-shell-command (concat "git push -f origin " 
+                                          my/hugo-public-branch)))
+        (error "push failed"))
+      (message "Yay!")))
 
   (defun hugo-server-start ()
     "Start hugo server in an inferior shell"
-   (interactive)
+    (interactive)
     (let ((eshell-buffer-name (concat "*hugo-server-" my/hugo-root "*")))
       (if (bufferp (get-buffer eshell-buffer-name))
           (kill-buffer eshell-buffer-name))
