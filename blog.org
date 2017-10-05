@@ -7,14 +7,12 @@
 :EXPORT_HUGO_SECTION: ox-hugo
 :EXPORT_FILE_NAME: _index
 :END:
-This is the source for my website at [[https://blog.rymcg.tech][blog.rymcg.tech]], a technology
-blog written in [[http://orgmode.org/][org-mode]] and published with [[https://github.com/kaushalmodi/ox-hugo/][ox-hugo]]. 
-
-The sections below contain the entirety of the website: the articles
-and blog posts, its configuration, the templates, themes, build
-process, and deployment scripts. If my website were to go down, I
-could recreate it from nothing but this file (plus any static assets,
-images, etc.)
+This is the source code for my website at [[https://blog.rymcg.tech][blog.rymcg.tech]], a
+technology blog written in [[http://orgmode.org/][org-mode]], and published with [[https://github.com/kaushalmodi/ox-hugo/][ox-hugo]]. Every
+page of the site is contained in [[https://raw.githubusercontent.com/enigmacurry/blog.rymcg.tech/master/blog.org][this Org file]]. If you're reading this
+in a web browser, you are reading the literal documentation of the
+website itself, describing all of its parts. If the website were to go
+down, I could recreate it from scratch by executing the steps below.
 
 This is a self-documenting deployment environment, using a literate
 programming style written with [[http://org-babel.readthedocs.io][org-babel]] code blocks. You are free to
@@ -73,7 +71,7 @@ Parts of this file will reference back to the following setting:
 ** Install dev version of hugo
 Currently I use the latest devolpment version of hugo, because I'm
 waiting for recent bugfixes to make it into stable. Here is
-[[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][kaushalmodi's script]] with a few tweaks.
+[[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][kaushalmodi's script]] with a few tweaks. 
 
 #+BEGIN_SRC shell :results none :noweb yes
 # /home/kmodi/go.apps/src/github.com/gohugoio/hugo/README.md
