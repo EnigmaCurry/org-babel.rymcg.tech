@@ -1,2 +1,3 @@
-# Ignore all hugo content, because it is all generated in blog.org
+# Ignore all tangled files, we want to recreate them:
 /blog
+/emacs

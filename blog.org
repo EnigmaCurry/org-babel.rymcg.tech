@@ -1,5 +1,6 @@
-#+HUGO_BASE_DIR: /home/ryan/git/rymcg.tech/blog
+#+HUGO_BASE_DIR: blog
 #+HUGO_WEIGHT: auto
+#+OPTIONS: broken-links:mark
 
 * Make your own website like this
 :PROPERTIES:
@@ -50,7 +51,7 @@ My configuration consists of:
 
 - [[https://www.gnu.org/software/emacs/][Emacs]] 25
 - [[https://www.gnu.org/software/emacs/][Org Mode]] 9 from the [[http://orgmode.org/elpa.html][project repos]]
-- [[https://gohugo.io/][Hugo]] git:master
+- [[https://gohugo.io/][Hugo]] git:master (see script below)
 - [[https://raw.githubusercontent.com/enigmacurry/blog.rymcg.tech/master/blog.org][This Org file]]
  - The best, lay on the couch, and readable format is at http://blog.rymcg.tech/ox-hugo
  - If you want to hack on it, you can fork it at https://github.com/enigmacurry/blog.rymcg.tech
@@ -59,24 +60,22 @@ My configuration consists of:
  - Your development version is at http://localhost:1313
   - That is, it will be once you download this and try it out for
     yourself, in Emacs org-mode! 
-** Deficiencies
- - *Path names are defined in multiple places*. I have not yet found a
-   way to make org-babel reference a single common root directory. I
-   can set =:dir= in the parent tree, but I can't seem to append a
-   filename on to the end of it or reference a variable in that
-   context. So just be aware that (for now) you have to search and
-   replace =~/git/rymcg.tech/=, at multiple places in this file and
-   change them to your directory structure. (There may be other things
-   to look out for. This is Literate Programming after all, you're
-   expected to 👓📚 *read* 📚👓 it.)
+** Configuration
+/*You need to change these settings according to your own environment:*/
+
+Parts of this file will reference back to the following setting: 
+*** Your local git checkout where you have blog.org:
+#+NAME: blog-org-src
+#+BEGIN_SRC txt
+~/git/rymcg.tech
+#+END_SRC
 
 ** Install dev version of hugo
 Currently I use the latest devolpment version of hugo, because I'm
 waiting for recent bugfixes to make it into stable. Here is
-[[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][kaushalmodi's script]] with a few tweaks. (Watch out, I hardcoded
-$GOPATH)
+[[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][kaushalmodi's script]] with a few tweaks.
 
-#+BEGIN_SRC shell :results none
+#+BEGIN_SRC shell :results none :noweb yes
 # /home/kmodi/go.apps/src/github.com/gohugoio/hugo/README.md
 # http://matthewkwilliams.com/index.php/2014/09/28/go-executables-are-statically-linked-except-when-they-are-not/
 
@@ -85,7 +84,7 @@ here=$(pwd)
 hugo_src="github.com/gohugoio/hugo"
 chroma_src="github.com/alecthomas/chroma"
 
-export GOPATH=$HOME/git/rymcg.tech/blog/go
+export GOPATH=<<blog-org-src>>/blog/go
 mkdir -p $GOPATH
 export CGO_ENABLED=0
 export GO_EXTLINK_ENABLED=0
@@ -149,18 +148,19 @@ cd "${here}" || exit
 
 
 ** Install
- - Create a new git repository. I create mine in =~/git/rymcg.tech=:
-   #+BEGIN_SRC shell
-git init ~/git/rymcg.tech
-   #+END_SRC
- - Download [[https://raw.githubusercontent.com/EnigmaCurry/blog.rymcg.tech/master/blog.org][blog.org]] saving it to your new repository in
-   =~/git/rymcg.tech=.
- - Use this code in your Emacs init file: 
-#+BEGIN_EXAMPLE emacs-lisp
-(let ((blog-init (expand-file-name "~/.emacs.d/blog.el")))
+ - Create a new git repository:
+#+BEGIN_SRC shell :noweb yes
+git init <<blog-org-src>>
+#+END_SRC
+ - Download [[https://raw.githubusercontent.com/EnigmaCurry/blog.rymcg.tech/master/blog.org][blog.org]] saving it to the new repository you created.
+ - Use this code in your Emacs init file:
+#+NAME: example-emacs-init
+#+BEGIN_SRC emacs-lisp :noweb yes
+;; Load blog.el which is tangled from blog.org:
+(let ((blog-init (expand-file-name "<<blog-org-src>>/blog.el")))
   (if (file-exists-p blog-init)
     (load-file blog-init)))
-#+END_EXAMPLE
+#+END_SRC
  - (Don't worry, blog.el doesn't exist yet. See the next sections.)
 
 ** Run!
@@ -180,16 +180,16 @@ build up a script to automate all of this.
     in =.org=.
   - You should see =Org= in the modeline.
   - =M-x org-version= should say something like 9.1 or higher.
- - Search and replace all the =~/git/rymcg.tech= directory references
-   to the path of your local website checkout.
- - Modify the rest of the config to your liking.
+ - Change the =blog-org-src= parameter in the Configuration section to
+   where you made your git repository.
+ - Modify the the config to your liking.
  - Save the file. It's yours now!
  - Tangle all the org-babel code blocks: 
   - (Tangle is org-babel lingo for: /save all code blocks marked with =:tangle= to the
     specified external file./)
   - Type =C-c C-v t= (or =M-x org-babel-tangle=)
-  - This creates =~/.emacs.d/blog.el= 
-  - This creates =~/git/rymcg.tech/blog=, the hugo =config.yml=
+  - This creates =emacs/blog.el= 
+  - This creates =blog=, the hugo =config.yml=
     file, and a bunch of other files defined below.
  - *Restart Emacs* to reload the config. 
    - Packages will automatically download from [[https://melpa.org/#/][MELPA]] the first time
@@ -214,10 +214,10 @@ Steps to run each time you want to publish =blog.org=:
   - Sometimes the hugo server crashes, if it does, just run =M-x
     hugo-server-start= again.
  - Before final publish, run hugo to translate the markdown to the public html:
-  - Type =M-x eshell-command RET bash -c 'cd ~/git/rymcg.tech/blog; ./go/bin/hugo'=
+  - Type =M-x eshell-command RET bash -c 'cd blog; ./go/bin/hugo'=
   - I was kidding, I don't type that.
-  - I just open a terminal in =~/git/rymcg.tech/blog= and run =./go/bin/hugo=.
- - Transfer the =~/git/rymcg.tech/blog/public= directory to your web host.
+  - I just open a terminal in =blog= and run =./go/bin/hugo=.
+ - Transfer the =blog/public= directory to your web host.
 
 *Phew!*
 
@@ -235,25 +235,27 @@ publish specific git branches and sub directories.
 This is the main config, it configures ox-hugo, initializes our blog
 directory, and sets up hugo server to run inside an Emacs eshell.
 
-#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.el
+#+BEGIN_SRC emacs-lisp :mkdirp yes :tangle ./emacs/blog.el :noweb yes
 (use-package ox-hugo
   :ensure t
   :after ox
   :init
-  (setq org-hugo-external-file-extensions-allowed-for-copying 
-        '(org tex jpg png svg pdf))
-  (setq my/blog-root (expand-file-name "~/git/rymcg.tech"))
+  ;; set my/blog-root to the directory containing blog.org:
+  (setq my/blog-root (expand-file-name "<<blog-org-src>>"))
   (setq my/blog-file (concat my/blog-root "/blog.org"))
   (setq my/hugo-root (concat my/blog-root "/blog"))
+  (setq my/hugo-bin (concat my/hugo-root "/go/bin/hugo"))
   (setq my/hugo-public-branch "public")
   (setq my/hugo-server-url "http://localhost:1313")
+  (setq org-hugo-external-file-extensions-allowed-for-copying 
+        '(org tex jpg png svg pdf))
 
-  ; blog related functions defined inside of use-package' =:init= conveniently
-  ; dissappear from your system if the package install fails. So I kind of like that.
+  ;; blog related functions defined inside of use-package' =:init= conveniently
+  ;; dissappear from your system if the package install fails. So I kind of like that.
   (defun blog-init ()
-    ; Tangle all files:
+    ;; Tangle all files:
     (org-babel-tangle-file my/blog-file)
-    ; Create theme files if necessary:
+    ;; Create theme files if necessary:
     ((lambda (filepath block-list)
        "Open an Org file and eval a list of named code blocks in it"
        (save-window-excursion
@@ -289,27 +291,27 @@ directory, and sets up hugo server to run inside an Emacs eshell.
                   "[[ `git rev-parse --abbrev-ref HEAD` == \"master\" ]]"))
       (error "You need to start on the master branch"))
     (let ((default-directory my/blog-root))
-      ; Tangle all files:
+      ;; Tangle all files:
       (org-babel-tangle-file my/blog-file)
-      ; Run ox-hugo to generate Markdown:
+      ;; Run ox-hugo to generate Markdown:
       (org-hugo-export-subtree-to-md 1)
-      ; Run hugo to generate HTML:
+      ;; Run hugo to generate HTML:
       (let ((default-directory my/hugo-root))
         (unless (= 0 (call-process-shell-command "./go/bin/hugo"))
           (error "hugo failed")))
       (if (not keep-branch)
-          ; Delete public branch:
+          ;; Delete public branch:
           (call-process-shell-command (concat "git branch -D " 
                                               my/hugo-public-branch)))
       (if (/= 0 (call-process-shell-command 
                  (concat "git rev-parse --verify " my/hugo-public-branch)))
           (progn
-            ; Create a new branch in another dimension:
+            ;; Create a new branch in another dimension:
             (call-process-shell-command (concat "git checkout --orphan " 
                                                 my/hugo-public-branch))
-            ; Get rid of the klingons:
+            ;; Get rid of the klingons:
             (call-process-shell-command "git rm --cached -r .") 
-            ; We only want to commit public site material:
+            ;; We only want to commit public site material:
             (call-process-shell-command (concat "echo -e '*\n"
                                                 "!.gitignore\n"
                                                 "!blog/\n"
@@ -322,13 +324,13 @@ directory, and sets up hugo server to run inside an Emacs eshell.
         (unless (= 0 (call-process-shell-command (concat "git checkout " 
                                                          my/hugo-public-branch)))
           (error (concat "could not check out " my/hugo-public-branch " branch"))))
-      ; Commit static site files:
+      ;; Commit static site files:
       (unless (= 0 (call-process-shell-command "git add blog/public/* && git commit -m public"))
         (error "commit failed"))
-      ; Go back to master:
+      ;; Go back to master:
       (unless (= 0 (call-process-shell-command "git checkout master"))
         (error "could not switch back to master branch!"))
-      ; Push
+      ;; Push
       (message "git push ...")
       (unless (= 0 (call-process-shell-command (concat "git push -f origin " 
                                           my/hugo-public-branch)))
@@ -345,7 +347,7 @@ directory, and sets up hugo server to run inside an Emacs eshell.
       (eshell-return-to-prompt)
       (insert (concat "cd " my/hugo-root))
       (eshell-send-input)
-      (insert "hugo server -D --navigateToChanged")
+      (insert (concat my/hugo-bin " server -D --navigateToChanged"))
       (eshell-send-input)
       (browse-url my/hugo-server-url)
       (message eshell-buffer-name))))
@@ -354,7 +356,7 @@ directory, and sets up hugo server to run inside an Emacs eshell.
 ** Hugo site skeleton
 Here's my main hugo config file:
 
-#+BEGIN_SRC yml :tangle ~/git/rymcg.tech/blog/config.yml :eval no :mkdirp yes
+#+BEGIN_SRC yml :tangle ./blog/config.yml :eval no :mkdirp yes
 baseURL: "https://blog.rymcg.tech/"
 languageCode: "en-us"
 DefaultContentLanguage: "en"
@@ -385,14 +387,14 @@ mediaTypes:
 #+END_SRC
 
 Create our site header:
-#+BEGIN_SRC markdown :mkdirp yes :eval no :tangle ~/git/rymcg.tech/blog/content/_header.md
+#+BEGIN_SRC markdown :mkdirp yes :eval no :tangle ./blog/content/_header.md
 rymcg.tech
 #+END_SRC
    
 Import the theme:
 
 #+NAME: hugo-import-theme
-#+BEGIN_SRC shell :dir ~/git/rymcg.tech/blog :results none
+#+BEGIN_SRC shell :dir ./blog :results none
 if [ ! -d themes/docdock ]; then
     mkdir -p themes
     git submodule add -f https://github.com/EnigmaCurry/hugo-theme-docdock themes/docdock
@@ -401,7 +403,7 @@ fi
 
 Create our own theme variant:
 
-#+BEGIN_SRC css :mkdirp yes :eval no :tangle ~/git/rymcg.tech/blog/static/css/theme-rymcg.css
+#+BEGIN_SRC css :mkdirp yes :eval no :tangle ./blog/static/css/theme-rymcg.css
 :root{
     --MAIN-BACK-color:#ddd;
     --MAIN-TXT-color: #000;
@@ -481,14 +483,14 @@ div.block-header {
     font-weight: bold;
     border-radius: 8px 8px 0 0;
 }
-div.block-header.fn {
+div.block-header {
+    background-color: #4d4b54;
+}
+div.block-header.tangle {
     background-color: #4e3a82;    
 }
 div.block-header.exec {
     background-color: #b93838;    
-}
-div.block-header.example, div.block-header.results {
-    background-color: #4d4b54;
 }
 .copy-to-clipboard {
     margin-top: -1px;
@@ -525,7 +527,7 @@ div#body-inner pre {
 Most syntax highlighting is done with Chroma, which is builtin to
 hugo. The site uses the =perldoc= theme:
 
-#+BEGIN_SRC css :tangle ~/git/rymcg.tech/blog/static/css/theme-rymcg.css
+#+BEGIN_SRC css :tangle ./blog/static/css/theme-rymcg.css
 /* perldoc syntax highlight style */
 /* Background */ .chroma { background-color: #eeeedd }
 /* Error */ .chroma .err { color: #a61717; background-color: #e3d2d2 }
@@ -593,7 +595,7 @@ hugo. The site uses the =perldoc= theme:
 As a fallback, highlight.js is used for blocks that chroma can't
 handle. Here's a slight mod of the =purebasic= theme:
 
-#+BEGIN_SRC css :tangle ~/git/rymcg.tech/blog/static/css/hybrid.css
+#+BEGIN_SRC css :tangle ./blog/static/css/hybrid.css
 .hljs {
 	background: #eeeedd !important;
 	display: block;
@@ -656,71 +658,77 @@ HTML.
  - Shell code blocks should have header with =Run in $DIR= 
  - Example blocks should have header with =Example= 
 
-#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.el
-; original credit to John Kitchin - https://stackoverflow.com/a/38876439/56560
-(defun rymcg/org-hugo-add-tangle-names-to-export (backend)
+#+BEGIN_SRC emacs-lisp :tangle ./emacs/blog.el
+;; original credit to John Kitchin - https://stackoverflow.com/a/38876439/56560
+(defun rymcg/org-hugo-export-block-headers (backend)
   (let ((src-blocks (org-element-map (org-element-parse-buffer) 'src-block #'identity)))
     (setq src-blocks (nreverse src-blocks))
     (loop for src in src-blocks
           do
-          (goto-char (org-element-property :begin src)) 
-          (let ((tangled-name (cdr (assoc :tangle (nth 2 (org-babel-get-src-block-info)))))
+          (goto-char (org-element-property :begin src))
+          (let ((tangle (cdr (assoc :tangle (nth 2 (org-babel-get-src-block-info)))))
                 (directory (cdr (assoc :dir (nth 2 (org-babel-get-src-block-info)))))
                 (language-name (first (org-babel-get-src-block-info)))
-                (code-block-name (nth 4 (org-babel-get-src-block-info))))
-            (if (not (equal tangled-name "no"))
-                                        ; tangle files get a header for the file name:
-                (insert (format "\n#+HTML: <div class='block-header fn'>Create in %s</div>\n" tangled-name))
-              (if (equal language-name "shell")
-                                        ; Non-tangled shell scripts get a header indicating to run it:
-                                        ; Show the directory if it's set:
-                  (insert (concat "\n#+HTML: <div class='block-header exec'>"
-                                  (if (> (length code-block-name) 0)
-                                      (format "%s - " code-block-name))
-                                  "Run"
-                                  (if (equal directory nil) "" (format " in %s" directory))
-                                  "</div>\n")))))))
-  (let ((example-blocks (org-element-map (org-element-parse-buffer) 'example-block #'identity)))
-    (setq example-blocks (nreverse example-blocks))
-    (loop for example in example-blocks
+                (block-name (nth 4 (org-babel-get-src-block-info))))
+            (let ((shell-block? (equal language-name "shell"))
+                  (tangle-block? (not (equal tangle "no"))))
+              (let ((block-name-fmt (if block-name (format "%s<br/>" block-name) ""))
+                    (html-class (cond (tangle-block? "block-header tangle")
+                                      (shell-block? "block-header exec")
+                                      ("block-header")))
+                    (header-txt (cond (tangle-block? (format "Create in %s" tangle))
+                                      (shell-block? 
+                                       (concat "Run" (if directory 
+                                                         (format " in %s" directory) "")))
+                                      ((not block-name) "&nbsp;")
+                                      (""))))
+                (insert (format "\n#+HTML: <div class='%s'>%s%s</div>\n" html-class 
+                                block-name-fmt header-txt)))))))
+
+  (let ((ex-blocks (org-element-map (org-element-parse-buffer) 'example-block #'identity)))
+    (setq ex-blocks (nreverse ex-blocks))
+    (loop for ex in ex-blocks
           do
-          (goto-char (org-element-property :begin example))
+          (goto-char (org-element-property :begin ex))
           (insert (format "\n#+HTML: <div class='block-header example'>Example</div>\n")))))
 
 (defadvice org-hugo-export-subtree-to-md (around org-hugo-export-advice)
-  (let ((org-export-before-processing-hook '(rymcg/org-hugo-add-tangle-names-to-export)))
+  (let ((org-export-before-processing-hook '(rymcg/org-hugo-export-block-headers)))
     ad-do-it))
 (ad-activate 'org-hugo-export-subtree-to-md)
 #+END_SRC
 
+#+RESULTS:
+: org-hugo-export-subtree-to-md
+
 ** Half baked ideas
 *** Export the output of code blocks and timestamp of last run
 
-#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.el
+#+BEGIN_SRC emacs-lisp :tangle ./emacs/blog.el
 (defadvice org-babel-insert-result (after org-babel-record-result-timestamp)
   (let ((code-block-params (nth 2 (org-babel-get-src-block-info)))
-        (code-block-name (nth 4 (org-babel-get-src-block-info))))
+        (block-name (nth 4 (org-babel-get-src-block-info))))
     (let ((timestamp (cdr (assoc :timestamp code-block-params)))
           (result-params (assoc :result-params code-block-params)))
       (if (and (equal timestamp "t") 
-               (> (length code-block-name) 0)
+               (> (length block-name) 0)
                (member "html" result-params))
           (save-excursion
             (goto-char (point-min))
             (search-forward-regexp (concat "^\w*#\\+RESULTS: " 
-                                           code-block-name 
+                                           block-name 
                                            "\n\w*#\\+BEGIN_EXPORT html\n"))
             (let ((beg (point)))
               (search-forward-regexp "^\w*#\\+END_EXPORT")
               (beginning-of-line)
               (kill-region beg (point)))
             (insert (format (concat "<div class=\"block-header results\">"
-                                    code-block-name
+                                    block-name
                                     " - Last run: %s</div>\n")
                             (format-time-string "%F %r")))
             (insert (format (concat "<div class=\"block-results\" "
                                     "id=\"results-%s\"><pre class=\"chroma\">\n") 
-                            code-block-name))
+                            block-name))
             (yank)
             (insert "</pre></div>\n"))
         (if (equal timestamp "t")
@@ -770,6 +778,23 @@ blog.org
 :END:
 ** Welcome
 This will eventually be a blog.
+
+* Org-babel tests
+:PROPERTIES:
+:EXPORT_HUGO_SECTION: org-babel
+:EXPORT_FILE_NAME: _index
+:END:
+These are org-babel experiments
+
+** Subsection paramters
+:PROPERTIES:
+:header-args: :dir /home/ryan
+:END:
+
+#+NAME: mydir
+#+BEGIN_SRC txt
+/home/ryan2
+#+END_SRC
 
 * Emacs
 :PROPERTIES:
