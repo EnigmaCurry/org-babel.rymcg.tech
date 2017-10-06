@@ -58,6 +58,7 @@ My configuration consists of:
  - Your development version is at http://localhost:1313
   - That is, it will be once you download this and try it out for
     yourself, in Emacs org-mode! 
+
 ** Configuration
 /*You need to change these settings according to your own environment:*/
 
@@ -767,6 +768,26 @@ blog
 blog.org
 </pre></div>
 #+END_EXPORT
+
+** Review
+OK, so having read this far, I'm expecting that you now have a bit of
+an environment setup. You're not just reading this in a web browser,
+you've got Emacs open on one half of your screen, and a web browser on
+the other viewing this site. You can see the source, save any changes,
+and they livereload on your browser instantly. Nice! 
+
+Now you have your own thing going. You can delete all the rest of this
+file. Make sure you keep all of this first section, it is now /your/
+documentation for /your/ site. You are now a nomad, a wayfaring hacker,
+surviving the wastelands of NullDevia, and rebuilding anew! But
+only if you keep the instructions in this section, you'll need those!
+
+The rest of this file you can delete, or keep as a reference, but my
+narrative becomes your narrative, so edit it however you feel like.
+
+The [[Local Variables]] section includes important Emacs configuration
+parameters to setup this file for the live reload feature, so maybe
+keep that.
 
 * Front Page
 :PROPERTIES:
