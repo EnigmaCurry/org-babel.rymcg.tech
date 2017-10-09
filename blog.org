@@ -145,8 +145,6 @@ go install -v \
 cd "${here}" || exit
 #+END_SRC
 
-
-
 ** Install
  - Create a new git repository:
 #+BEGIN_SRC shell :noweb yes
@@ -401,6 +399,17 @@ if [ ! -d themes/docdock ]; then
 fi
 #+END_SRC
 
+Customize the header for each page, include any [[https://gohugo.io/variables/page/][Hugo Page Variables]]:
+
+#+BEGIN_SRC html :mkdirp yes :tangle ./blog/layouts/partials/custom-post-header.html
+<div id="post-meta">
+{{if $.Param "author"}} Author: {{ $.Param "author"}}<br/>{{end}}
+{{if gt .Date 0}} Published: {{.Date.Format "January 1, 2006"}} 
+  {{if ne .Lastmod .Date}}(<b>last update: {{.Lastmod.Format "January 1, 2006"}}</b>){{end}}<br/>
+{{end}}
+</div>
+#+END_SRC
+
 Create our own theme variant:
 
 #+BEGIN_SRC css :mkdirp yes :eval no :tangle ./blog/static/css/theme-rymcg.css
@@ -514,6 +523,14 @@ div#breadcrumbs {
 }
 div#body-inner {
     max-width: 100ch;
+}
+div#body-inner h1 {
+    margin-bottom: 0;
+}
+div#post-meta {
+    font-size: 0.7em;
+    font-family: sans-serif;
+    margin-bottom: 3em;
 }
 div#body-inner pre {
     margin-top: 0;
@@ -799,22 +816,21 @@ keep that.
 ** Welcome
 This will eventually be a blog.
 
-* Org-babel tests
+* Org-babel tests                            :orgmode:
 :PROPERTIES:
 :EXPORT_HUGO_SECTION: org-babel
 :EXPORT_FILE_NAME: _index
+:EXPORT_DATE: <2017-10-09 Mon>
+:EXPORT_HUGO_LASTMOD: <2017-11-09 Thu>
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :aliases asdf2z,asdf
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER+: :author EnigmaCurry
 :END:
 These are org-babel experiments
 
-** Subsection paramters
+** Subsection parameters
 :PROPERTIES:
 :header-args: :dir /home/ryan
 :END:
-
-#+NAME: mydir
-#+BEGIN_SRC txt
-/home/ryan2
-#+END_SRC
 
 * Emacs
 :PROPERTIES:
