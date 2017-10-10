@@ -1,9 +1,9 @@
 # Ignore tangled emacs bootstrap:
 /emacs
 
-# Ignore everything in blog except for static files:
-!/blog/
-/blog/*
-!/blog/static/
-/blog/static/*
-!/blog/static/images
+# Ignore everything in hugo except for static files:
+!/hugo/
+/hugo/*
+!/hugo/static/
+/hugo/static/*
+!/hugo/static/images

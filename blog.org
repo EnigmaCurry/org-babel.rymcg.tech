@@ -1,12 +1,15 @@
-#+HUGO_BASE_DIR: blog
+#+HUGO_BASE_DIR: hugo
 #+HUGO_WEIGHT: auto
 #+OPTIONS: broken-links:mark
 
 * Make your own website like this
 :PROPERTIES:
 :EXPORT_HUGO_SECTION: ox-hugo
-:EXPORT_FILE_NAME: _index
 :END:
+** Make your own website like this
+:PROPERTIES:
+   :EXPORT_FILE_NAME: _index
+   :END:
 This is the source code for my website at [[https://blog.rymcg.tech][blog.rymcg.tech]], a
 technology blog written in [[http://orgmode.org/][org-mode]], and published with [[https://github.com/kaushalmodi/ox-hugo/][ox-hugo]]. Every
 page of the site is contained in [[https://raw.githubusercontent.com/enigmacurry/blog.rymcg.tech/master/blog.org][this Org file]]. If you're reading this
@@ -19,58 +22,161 @@ programming style written with [[http://org-babel.readthedocs.io][org-babel]] co
 copy this file, or any portion of it, subject to the regular MIT
 license:
 
-** License
-#+BEGIN_QUOTE
-Copyright (c) 2017 EnigmaCurry - http://blog.rymcg.tech/ox-hugo
-Copyright (c) 2014 Grav 
-Copyright (c) 2016 MATHIEU CORNIC 
-Copyright (c) 2017 Valere JEANTET
+*** License
+ #+BEGIN_QUOTE
+ Copyright (c) 2017 EnigmaCurry - http://blog.rymcg.tech/ox-hugo
+ Copyright (c) 2014 Grav 
+ Copyright (c) 2016 MATHIEU CORNIC 
+ Copyright (c) 2017 Valere JEANTET
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-#+END_QUOTE
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ #+END_QUOTE
 
-** Dependencies
+*** Dependencies
 My configuration consists of:
 
-- [[https://www.gnu.org/software/emacs/][Emacs]] 25
-- [[https://www.gnu.org/software/emacs/][Org Mode]] 9 from the [[http://orgmode.org/elpa.html][project repos]]
-- [[https://gohugo.io/][Hugo]] git:master (see script below)
-- [[https://raw.githubusercontent.com/enigmacurry/blog.rymcg.tech/master/blog.org][This Org file]]
- - The best, lay on the couch, and readable format is at http://blog.rymcg.tech/ox-hugo
- - If you want to hack on it, you can fork it at https://github.com/enigmacurry/blog.rymcg.tech
-  - Github renders Org syntax, but not very well, so I don't recommend
-    reading this on github.com.
- - Your development version is at http://localhost:1313
-  - That is, it will be once you download this and try it out for
-    yourself, in Emacs org-mode! 
+ - [[https://www.gnu.org/software/emacs/][Emacs]] 25
+ - [[https://www.gnu.org/software/emacs/][Org Mode]] 9 from the [[http://orgmode.org/elpa.html][project repos]]
+ - [[https://gohugo.io/][Hugo]] git:master (see script below)
+ - [[https://raw.githubusercontent.com/enigmacurry/blog.rymcg.tech/master/blog.org][This Org file]]
+  - The best, lay on the couch, and readable format is at http://blog.rymcg.tech/ox-hugo
+  - If you want to hack on it, you can fork it at https://github.com/enigmacurry/blog.rymcg.tech
+   - Github renders Org syntax, but not very well, so I don't recommend
+     reading this on github.com.
+  - Your development version is at http://localhost:1313
+   - That is, it will be once you download this and try it out for
+     yourself, in Emacs org-mode! 
+
+*** Linking to static files
+
+Put your images in =./hugo/static/images=
+
+Test: [[/images/lolwut.png]]
+
+{{% notice info %}}
+Each static directory needs to be whitelisted in =.gitignore= (already done for images subdir.)
+{{% /notice %}}
+
+*** Half baked ideas
+**** Export the output of code blocks and timestamp of last run
+
+ #+BEGIN_SRC emacs-lisp :tangle ./emacs/blog.el
+(defadvice org-babel-insert-result (after org-babel-record-result-timestamp)
+  (let ((code-block-params (nth 2 (org-babel-get-src-block-info)))
+        (block-name (nth 4 (org-babel-get-src-block-info))))
+    (let ((timestamp (cdr (assoc :timestamp code-block-params)))
+          (result-params (assoc :result-params code-block-params)))
+      (if (and (equal timestamp "t") 
+               (> (length block-name) 0)
+               (member "html" result-params))
+          (save-excursion
+            (goto-char (point-min))
+            (search-forward-regexp (concat "^\w*#\\+RESULTS: " 
+                                           block-name 
+                                           "\n\w*#\\+BEGIN_EXPORT html\n"))
+            (let ((beg (point)))
+              (search-forward-regexp "^\w*#\\+END_EXPORT")
+              (beginning-of-line)
+              (kill-region beg (point)))
+            (insert (format (concat "<div class=\"block-header results\">"
+                                    block-name
+                                    " - Last run: %s</div>\n")
+                            (format-time-string "%F %r")))
+            (insert (format (concat "<div class=\"block-results\" "
+                                    "id=\"results-%s\"><pre class=\"chroma\">\n") 
+                            block-name))
+            (yank)
+            (insert "</pre></div>\n"))
+        (if (equal timestamp "t")
+            (message (concat "Result timestamping requires a #+NAME: "
+                             "and a ':results html' argument.")))))))
+(ad-activate 'org-babel-insert-result)
+ #+END_SRC
+
+Output requires the code block to have all these parameters:
+
+ - =#+NAME:=
+   - A unique name for the code block ensures that the correct result
+     block will be updated.
+ - =:timestamp t=
+  - Turns on the timestamp
+ - =:exports both= 
+  - Exports both the code block itself, and it's output, to HTML.
+ - =:results html= 
+  - Formats the result as HTML.
+ - =:eval never-export= 
+  - (Optional) Makes it so the block is *not* automatically evaluated
+    on export. It has to be manually run.
+
+#+NAME: testguy
+#+BEGIN_SRC shell :results html :exports both :eval never-export :timestamp t
+whoami
+ls
+#+END_SRC
+
+Results and timestamp are exported to HTML each time the block is re-evaluated:
+
+#+RESULTS: testguy
+#+BEGIN_EXPORT html
+<div class="block-header results">testguy - Last run: 2017-10-03 06:38:02 PM</div>
+<div class="block-results" id="results-testguy"><pre class="chroma">
+ryan
+blog
+blog.org
+</pre></div>
+#+END_EXPORT
+
+*** Review
+OK, so having read this far, I'm expecting that you now have a bit of
+an environment setup. You're not just reading this in a web browser,
+you've got Emacs open on one half of your screen, and a web browser on
+the other viewing this site. You can see the source, save any changes,
+and they livereload on your browser instantly. Nice! 
+
+Now you have your own thing going. You can delete all the rest of this
+file. Make sure you keep all of this first section, it is now /your/
+documentation for /your/ site. You are now a nomad, a wayfaring hacker,
+surviving the wastelands of NullDevia, and rebuilding anew! But
+only if you keep the instructions in this section, you'll need those!
+
+The rest of this file you can delete, or keep as a reference, but my
+narrative becomes your narrative, so edit it however you feel like.
+
+The [[Local Variables]] section includes important Emacs configuration
+parameters to setup this file for the live reload feature, so maybe
+keep that.
 
 ** Configuration
+:PROPERTIES:
+:EXPORT_FILE_NAME: configuration
+:END:
+*** Environment
 /*You need to change these settings according to your own environment:*/
 
 Parts of this file will reference back to the following setting: 
-*** Your local git checkout where you have blog.org:
+**** Your local git checkout where you have blog.org:
 #+NAME: blog-org-src
 #+BEGIN_SRC txt
 ~/git/rymcg.tech
 #+END_SRC
 
-** Install dev version of hugo
+*** Install dev version of hugo
 Currently I use the latest devolpment version of hugo, because I'm
 waiting for recent bugfixes to make it into stable. Here is
 [[https://gist.github.com/kaushalmodi/456b5ea26b3e869e5d63d4a67b85f676][kaushalmodi's script]] with a few tweaks. 
@@ -84,7 +190,7 @@ here=$(pwd)
 hugo_src="github.com/gohugoio/hugo"
 chroma_src="github.com/alecthomas/chroma"
 
-export GOPATH=<<blog-org-src>>/blog/go
+export GOPATH=<<blog-org-src>>/hugo/go
 mkdir -p $GOPATH
 export CGO_ENABLED=0
 export GO_EXTLINK_ENABLED=0
@@ -143,9 +249,9 @@ go install -v \
    ${hugo_src}
 
 cd "${here}" || exit
-#+END_SRC
+ #+END_SRC
 
-** Install
+*** Install
  - Create a new git repository:
 #+BEGIN_SRC shell :noweb yes
 git init <<blog-org-src>>
@@ -155,13 +261,13 @@ git init <<blog-org-src>>
 #+NAME: example-emacs-init
 #+BEGIN_SRC emacs-lisp :noweb yes
 ;; Load blog.el which is tangled from blog.org:
-(let ((blog-init (expand-file-name "<<blog-org-src>>/blog.el")))
+(let ((blog-init (expand-file-name "<<blog-org-src>>/emacs/blog.el")))
   (if (file-exists-p blog-init)
     (load-file blog-init)))
 #+END_SRC
  - (Don't worry, blog.el doesn't exist yet. See the next sections.)
 
-** Run!
+*** Run!
 
 These are the *manual* steps for building the website, directly from
 org-mode. I know, this looks /a bit tedious/, but this should make it
@@ -194,7 +300,7 @@ build up a script to automate all of this.
      it's loaded, so be patient. Watch for any errors in the
      =*Messages*= buffer.
 
-Steps to run each time you want to publish =blog.org=: 
+ Steps to run each time you want to publish =blog.org=: 
 
  - Save any changes to =blog.org=
  - Run ox-hugo to export Org to markdown:
@@ -212,10 +318,11 @@ Steps to run each time you want to publish =blog.org=:
   - Sometimes the hugo server crashes, if it does, just run =M-x
     hugo-server-start= again.
  - Before final publish, run hugo to translate the markdown to the public html:
-  - Type =M-x eshell-command RET bash -c 'cd blog; ./go/bin/hugo'=
+  - Type =M-x eshell-command RET bash -c 'cd hugo; ./go/bin/hugo'=
   - I was kidding, I don't type that.
-  - I just open a terminal in =blog= and run =./go/bin/hugo=.
- - Transfer the =blog/public= directory to your web host.
+  - I just open a terminal in the =hugo= directory and run
+    =./go/bin/hugo=.
+ - Transfer the =hugo/public= directory to your web host.
 
 *Phew!*
 
@@ -223,14 +330,14 @@ Now that you went through all that, and you understand it, you have
 graduated to using the *automated* script (yay!) Read the next section, and
 then just run =M-x blog-publish= from now on. It will create a new
 =public= branch, where it will build and publish HTML to
-=blog/public=. The =public= branch is ephemeral, it gets blown away
+=hugo/public=. The =public= branch is ephemeral, it gets blown away
 and created from scratch each time you run =M-x blog-publish=. Keep
 your =blog.org= in the =master= branch. Keeping the HTML in a seperate
 branch, keeps commits clean. Hosts like [[https://www.netlify.com/][netlify]] make it easy to
 publish specific git branches and sub directories.
 
-** ox-hugo
-This is the main config, it configures ox-hugo, initializes our blog
+*** ox-hugo
+This is the main config, it configures ox-hugo, initializes our hugo
 directory, and sets up hugo server to run inside an Emacs eshell.
 
 #+BEGIN_SRC emacs-lisp :mkdirp yes :tangle ./emacs/blog.el :noweb yes
@@ -241,7 +348,7 @@ directory, and sets up hugo server to run inside an Emacs eshell.
   ;; set my/blog-root to the directory containing blog.org:
   (setq my/blog-root (expand-file-name "<<blog-org-src>>"))
   (setq my/blog-file (concat my/blog-root "/blog.org"))
-  (setq my/hugo-root (concat my/blog-root "/blog"))
+  (setq my/hugo-root (concat my/blog-root "/hugo"))
   (setq my/hugo-bin (concat my/hugo-root "/go/bin/hugo"))
   (setq my/hugo-public-branch "public")
   (setq my/hugo-server-url "http://localhost:1313")
@@ -310,10 +417,10 @@ directory, and sets up hugo server to run inside an Emacs eshell.
             ;; We only want to commit public site material:
             (call-process-shell-command (concat "echo -e '*\n"
                                                 "!.gitignore\n"
-                                                "!blog/\n"
-                                                "!blog/public/\n"
-                                                "!blog/public/*\n"
-                                                "!blog/public/*/*\n"
+                                                "!hugo/\n"
+                                                "!hugo/public/\n"
+                                                "!hugo/public/*\n"
+                                                "!hugo/public/*/*\n"
                                                 "' > .gitignore"))
             (call-process-shell-command "git add .gitignore")
             (call-process-shell-command "git commit -m 'initial static html setup'"))
@@ -321,7 +428,7 @@ directory, and sets up hugo server to run inside an Emacs eshell.
                                                          my/hugo-public-branch)))
           (error (concat "could not check out " my/hugo-public-branch " branch"))))
       ;; Commit static site files:
-      (unless (= 0 (call-process-shell-command "git add blog/public/* && git commit -m public"))
+      (unless (= 0 (call-process-shell-command "git add hugo/public/* && git commit -m public"))
         (error "commit failed"))
       ;; Go back to master:
       (unless (= 0 (call-process-shell-command "git checkout master"))
@@ -349,10 +456,10 @@ directory, and sets up hugo server to run inside an Emacs eshell.
       (message eshell-buffer-name))))
 #+END_SRC
 
-** Hugo site skeleton
+*** Hugo site skeleton
 Here's my main hugo config file:
 
-#+BEGIN_SRC yml :tangle ./blog/config.yml :eval no :mkdirp yes
+#+BEGIN_SRC yml :tangle ./hugo/config.yml :eval no :mkdirp yes
 baseURL: "https://blog.rymcg.tech/"
 languageCode: "en-us"
 DefaultContentLanguage: "en"
@@ -383,23 +490,23 @@ mediaTypes:
 #+END_SRC
 
 Create our site header:
-#+BEGIN_SRC markdown :mkdirp yes :eval no :tangle ./blog/content/_header.md
+#+BEGIN_SRC markdown :mkdirp yes :eval no :tangle ./hugo/content/_header.md
 rymcg.tech
 #+END_SRC
-   
+
 Import the theme:
 
 #+NAME: hugo-import-theme
-#+BEGIN_SRC shell :dir ./blog :results none
+ #+BEGIN_SRC shell :dir ./hugo :results none
 if [ ! -d themes/docdock ]; then
     mkdir -p themes
     git submodule add -f https://github.com/EnigmaCurry/hugo-theme-docdock themes/docdock
 fi
-#+END_SRC
+ #+END_SRC
 
 Customize the header for each page, include any [[https://gohugo.io/variables/page/][Hugo Page Variables]]:
 
-#+BEGIN_SRC html :mkdirp yes :tangle ./blog/layouts/partials/custom-post-header.html
+#+BEGIN_SRC html :mkdirp yes :tangle ./hugo/layouts/partials/custom-post-header.html
 <div id="post-meta">
 {{if $.Param "draft"}}
    <div class="notices info">This page is an unpublished draft.</div>
@@ -416,7 +523,7 @@ Customize the header for each page, include any [[https://gohugo.io/variables/pa
 
 Create our own theme variant:
 
-#+BEGIN_SRC css :mkdirp yes :eval no :tangle ./blog/static/css/theme-rymcg.css
+#+BEGIN_SRC css :mkdirp yes :eval no :tangle ./hugo/static/css/theme-rymcg.css
 :root{
     --MAIN-BACK-color:#ddd;
     --MAIN-TXT-color: #000;
@@ -548,7 +655,7 @@ div#body-inner pre {
 Most syntax highlighting is done with Chroma, which is builtin to
 hugo. The site uses the =perldoc= theme:
 
-#+BEGIN_SRC css :tangle ./blog/static/css/theme-rymcg.css
+#+BEGIN_SRC css :tangle ./hugo/static/css/theme-rymcg.css
 /* perldoc syntax highlight style */
 /* Background */ .chroma { background-color: #eeeedd }
 /* Error */ .chroma .err { color: #a61717; background-color: #e3d2d2 }
@@ -616,7 +723,7 @@ hugo. The site uses the =perldoc= theme:
 As a fallback, highlight.js is used for blocks that chroma can't
 handle. Here's a slight mod of the =purebasic= theme:
 
-#+BEGIN_SRC css :tangle ./blog/static/css/hybrid.css
+#+BEGIN_SRC css :tangle ./hugo/static/css/hybrid.css
 .hljs {
 	background: #eeeedd !important;
 	display: block;
@@ -654,7 +761,7 @@ handle. Here's a slight mod of the =purebasic= theme:
 }
 #+END_SRC
 
-** Code block headers
+*** Code block headers
 When reading code blocks in Org file source it's pretty easy to see
 what file it's referring to, by looking at the =:tangle= parameter:
 
@@ -671,7 +778,7 @@ confusing to the user reading in his web browser. The latter form
 means you're repeating yourself, and when you refactor path names, you
 will have an additional thing you need to edit, or else an opportunity
 arises for the documentation to diverge from the code. Messy.
-
+ 
 Let's automatically add headers to all the code blocks exported to
 HTML.
 
@@ -722,7 +829,7 @@ HTML.
 #+RESULTS:
 : org-hugo-export-subtree-to-md
 
-** RSS
+*** RSS
 Hugo ships with it's own [[https://gohugo.io/templates/rss/#the-embedded-rss-xml][RSS template]], but let's create our own:
 
  - Only include the 30 most recent entries.
@@ -730,7 +837,7 @@ Hugo ships with it's own [[https://gohugo.io/templates/rss/#the-embedded-rss-xml
  - Include any pages that have a date, /including =_index= pages/.
   - The date must be set in the front matter params, by ox-hugo.
 
-#+BEGIN_SRC xml :tangle ./blog/layouts/rss.xml
+#+BEGIN_SRC xml :mkdirp yes :tangle ./hugo/layouts/rss.xml
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>{{ .Site.Title }}</title>
@@ -750,113 +857,15 @@ Hugo ships with it's own [[https://gohugo.io/templates/rss/#the-embedded-rss-xml
       </item>{{ end }}
   </channel>
 </rss>
-#+END_SRC
+ #+END_SRC
 
 Add a link to the RSS in the page head:
 
-#+BEGIN_SRC html :tangle ./blog/layouts/partials/custom-head.html
+#+BEGIN_SRC html :tangle ./hugo/layouts/partials/custom-head.html
 {{ if .RSSLink }}
   <link href="{{ .RSSLink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
 {{ end }}
 #+END_SRC
-** Linking to static files
-
-Put your images in =./blog/static/images=
-
-Test: [[/images/lolwut.png]]
-
-{{% notice info %}}
-Each static directory needs to be whitelisted in =.gitignore= (already done for images subdir.)
-{{% /notice %}}
-
-** Half baked ideas
-*** Export the output of code blocks and timestamp of last run
-
-#+BEGIN_SRC emacs-lisp :tangle ./emacs/blog.el
-(defadvice org-babel-insert-result (after org-babel-record-result-timestamp)
-  (let ((code-block-params (nth 2 (org-babel-get-src-block-info)))
-        (block-name (nth 4 (org-babel-get-src-block-info))))
-    (let ((timestamp (cdr (assoc :timestamp code-block-params)))
-          (result-params (assoc :result-params code-block-params)))
-      (if (and (equal timestamp "t") 
-               (> (length block-name) 0)
-               (member "html" result-params))
-          (save-excursion
-            (goto-char (point-min))
-            (search-forward-regexp (concat "^\w*#\\+RESULTS: " 
-                                           block-name 
-                                           "\n\w*#\\+BEGIN_EXPORT html\n"))
-            (let ((beg (point)))
-              (search-forward-regexp "^\w*#\\+END_EXPORT")
-              (beginning-of-line)
-              (kill-region beg (point)))
-            (insert (format (concat "<div class=\"block-header results\">"
-                                    block-name
-                                    " - Last run: %s</div>\n")
-                            (format-time-string "%F %r")))
-            (insert (format (concat "<div class=\"block-results\" "
-                                    "id=\"results-%s\"><pre class=\"chroma\">\n") 
-                            block-name))
-            (yank)
-            (insert "</pre></div>\n"))
-        (if (equal timestamp "t")
-            (message (concat "Result timestamping requires a #+NAME: "
-                             "and a ':results html' argument.")))))))
-(ad-activate 'org-babel-insert-result)
-#+END_SRC
-
-Output requires the code block to have all these parameters:
-
- - =#+NAME:=
-  - A unique name for the code block ensures that the correct result
-    block will be updated.
- - =:timestamp t=
-  - Turns on the timestamp
- - =:exports both= 
-  - Exports both the code block itself, and it's output, to HTML.
- - =:results html= 
-  - Formats the result as HTML.
- - =:eval never-export= 
-  - (Optional) Makes it so the block is *not* automatically evaluated
-    on export. It has to be manually run.
-
-#+NAME: testguy
-#+BEGIN_SRC shell :results html :exports both :eval never-export :timestamp t
-whoami
-ls
-#+END_SRC
-
-Results and timestamp are exported to HTML each time the block is re-evaluated:
-
-#+RESULTS: testguy
-#+BEGIN_EXPORT html
-<div class="block-header results">testguy - Last run: 2017-10-03 06:38:02 PM</div>
-<div class="block-results" id="results-testguy"><pre class="chroma">
-ryan
-blog
-blog.org
-</pre></div>
-#+END_EXPORT
-
-** Review
-OK, so having read this far, I'm expecting that you now have a bit of
-an environment setup. You're not just reading this in a web browser,
-you've got Emacs open on one half of your screen, and a web browser on
-the other viewing this site. You can see the source, save any changes,
-and they livereload on your browser instantly. Nice! 
-
-Now you have your own thing going. You can delete all the rest of this
-file. Make sure you keep all of this first section, it is now /your/
-documentation for /your/ site. You are now a nomad, a wayfaring hacker,
-surviving the wastelands of NullDevia, and rebuilding anew! But
-only if you keep the instructions in this section, you'll need those!
-
-The rest of this file you can delete, or keep as a reference, but my
-narrative becomes your narrative, so edit it however you feel like.
-
-The [[Local Variables]] section includes important Emacs configuration
-parameters to setup this file for the live reload feature, so maybe
-keep that.
 
 * Front Page
 :PROPERTIES:

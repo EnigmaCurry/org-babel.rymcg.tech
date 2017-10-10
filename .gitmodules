@@ -1,3 +1,6 @@
 [submodule "blog/themes/docdock"]
-	path = blog/themes/docdock
+	path = hugo/themes/docdock
+	url = https://github.com/EnigmaCurry/hugo-theme-docdock
+[submodule "hugo/themes/docdock"]
+	path = hugo/themes/docdock
 	url = https://github.com/EnigmaCurry/hugo-theme-docdock
