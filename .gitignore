@@ -1,3 +1,9 @@
-# Ignore all tangled files, we want to recreate them:
-/blog
+# Ignore tangled emacs bootstrap:
 /emacs
+
+# Ignore everything in blog except for static files:
+!/blog/
+/blog/*
+!/blog/static/
+/blog/static/*
+!/blog/static/images

@@ -245,8 +245,6 @@ directory, and sets up hugo server to run inside an Emacs eshell.
   (setq my/hugo-bin (concat my/hugo-root "/go/bin/hugo"))
   (setq my/hugo-public-branch "public")
   (setq my/hugo-server-url "http://localhost:1313")
-  (setq org-hugo-external-file-extensions-allowed-for-copying 
-        '(org tex jpg png svg pdf))
 
   ;; blog related functions defined inside of use-package' =:init= conveniently
   ;; dissappear from your system if the package install fails. So I kind of like that.
@@ -761,8 +759,16 @@ Add a link to the RSS in the page head:
   <link href="{{ .RSSLink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
 {{ end }}
 #+END_SRC
+** Linking to static files
 
-** 
+Put your images in =./blog/static/images=
+
+Test: [[/images/lolwut.png]]
+
+{{% notice info %}}
+Each static directory needs to be whitelisted in =.gitignore= (already done for images subdir.)
+{{% /notice %}}
+
 ** Half baked ideas
 *** Export the output of code blocks and timestamp of last run
 
