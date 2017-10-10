@@ -406,10 +406,10 @@ Customize the header for each page, include any [[https://gohugo.io/variables/pa
 {{if $.Param "draft"}}
    <div class="notices info">This page is an unpublished draft.</div>
 {{end}}
-{{if $.Param "author"}} 
+   {{if $.Param "author"}} 
   Author: {{ $.Param "author"}}<br/>
 {{end}}
-{{if gt .Date 0}}
+{{if not .Date.IsZero}}
   Published: {{.Date.Format "January 1, 2006"}}
   {{if ne .Lastmod .Date}}(<b>last update: {{.Lastmod.Format "January 1, 2006"}}</b>){{end}}<br/>
 {{end}}
