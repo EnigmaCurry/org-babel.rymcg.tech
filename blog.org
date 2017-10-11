@@ -20,33 +20,7 @@ down, I could recreate it from scratch by executing the steps below.
 This is a self-documenting deployment environment, using a literate
 programming style written with [[http://org-babel.readthedocs.io][org-babel]] code blocks. You are free to
 copy this file, or any portion of it, subject to the regular MIT
-license:
-
-*** License
- #+BEGIN_QUOTE
- Copyright (c) 2017 EnigmaCurry - http://blog.rymcg.tech/ox-hugo
- Copyright (c) 2014 Grav 
- Copyright (c) 2016 MATHIEU CORNIC 
- Copyright (c) 2017 Valere JEANTET
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
- #+END_QUOTE
+license.
 
 *** Dependencies
 My configuration consists of:
@@ -63,105 +37,59 @@ My configuration consists of:
    - That is, it will be once you download this and try it out for
      yourself, in Emacs org-mode! 
 
-*** Linking to static files
+** Licenses
+:PROPERTIES:
+:EXPORT_FILE_NAME: license
+:END:
+The software defined in this file is open source and MIT licensed:
 
-Put your images in =./hugo/static/images=
+#+BEGIN_QUOTE
+Copyright (c) 2017 EnigmaCurry - http://blog.rymcg.tech/ox-hugo
 
-Test: [[/images/lolwut.png]]
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-{{% notice info %}}
-Each static directory needs to be whitelisted in =.gitignore= (already done for images subdir.)
-{{% /notice %}}
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-*** Half baked ideas
-**** Export the output of code blocks and timestamp of last run
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+#+END_QUOTE
 
- #+BEGIN_SRC emacs-lisp :tangle ./emacs/blog.el
-(defadvice org-babel-insert-result (after org-babel-record-result-timestamp)
-  (let ((code-block-params (nth 2 (org-babel-get-src-block-info)))
-        (block-name (nth 4 (org-babel-get-src-block-info))))
-    (let ((timestamp (cdr (assoc :timestamp code-block-params)))
-          (result-params (assoc :result-params code-block-params)))
-      (if (and (equal timestamp "t") 
-               (> (length block-name) 0)
-               (member "html" result-params))
-          (save-excursion
-            (goto-char (point-min))
-            (search-forward-regexp (concat "^\w*#\\+RESULTS: " 
-                                           block-name 
-                                           "\n\w*#\\+BEGIN_EXPORT html\n"))
-            (let ((beg (point)))
-              (search-forward-regexp "^\w*#\\+END_EXPORT")
-              (beginning-of-line)
-              (kill-region beg (point)))
-            (insert (format (concat "<div class=\"block-header results\">"
-                                    block-name
-                                    " - Last run: %s</div>\n")
-                            (format-time-string "%F %r")))
-            (insert (format (concat "<div class=\"block-results\" "
-                                    "id=\"results-%s\"><pre class=\"chroma\">\n") 
-                            block-name))
-            (yank)
-            (insert "</pre></div>\n"))
-        (if (equal timestamp "t")
-            (message (concat "Result timestamping requires a #+NAME: "
-                             "and a ':results html' argument.")))))))
-(ad-activate 'org-babel-insert-result)
- #+END_SRC
+The theme files (as configured) are also MIT:
 
-Output requires the code block to have all these parameters:
+#+BEGIN_QUOTE
+Copyright (c) 2014 Grav 
+Copyright (c) 2016 MATHIEU CORNIC 
+Copyright (c) 2017 Valere JEANTET
 
- - =#+NAME:=
-   - A unique name for the code block ensures that the correct result
-     block will be updated.
- - =:timestamp t=
-  - Turns on the timestamp
- - =:exports both= 
-  - Exports both the code block itself, and it's output, to HTML.
- - =:results html= 
-  - Formats the result as HTML.
- - =:eval never-export= 
-  - (Optional) Makes it so the block is *not* automatically evaluated
-    on export. It has to be manually run.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-#+NAME: testguy
-#+BEGIN_SRC shell :results html :exports both :eval never-export :timestamp t
-whoami
-ls
-#+END_SRC
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-Results and timestamp are exported to HTML each time the block is re-evaluated:
-
-#+RESULTS: testguy
-#+BEGIN_EXPORT html
-<div class="block-header results">testguy - Last run: 2017-10-03 06:38:02 PM</div>
-<div class="block-results" id="results-testguy"><pre class="chroma">
-ryan
-blog
-blog.org
-</pre></div>
-#+END_EXPORT
-
-*** Review
-OK, so having read this far, I'm expecting that you now have a bit of
-an environment setup. You're not just reading this in a web browser,
-you've got Emacs open on one half of your screen, and a web browser on
-the other viewing this site. You can see the source, save any changes,
-and they livereload on your browser instantly. Nice! 
-
-Now you have your own thing going. You can delete all the rest of this
-file. Make sure you keep all of this first section, it is now /your/
-documentation for /your/ site. You are now a nomad, a wayfaring hacker,
-surviving the wastelands of NullDevia, and rebuilding anew! But
-only if you keep the instructions in this section, you'll need those!
-
-The rest of this file you can delete, or keep as a reference, but my
-narrative becomes your narrative, so edit it however you feel like.
-
-The [[Local Variables]] section includes important Emacs configuration
-parameters to setup this file for the live reload feature, so maybe
-keep that.
-
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+#+END_QUOTE
 ** Configuration
 :PROPERTIES:
 :EXPORT_FILE_NAME: configuration
@@ -420,7 +348,7 @@ directory, and sets up hugo server to run inside an Emacs eshell.
                                                 "!hugo/\n"
                                                 "!hugo/public/\n"
                                                 "!hugo/public/*\n"
-                                                "!hugo/public/*/*\n"
+                                                "!hugo/public/**/*\n"
                                                 "' > .gitignore"))
             (call-process-shell-command "git add .gitignore")
             (call-process-shell-command "git commit -m 'initial static html setup'"))
@@ -866,6 +794,111 @@ Add a link to the RSS in the page head:
   <link href="{{ .RSSLink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
 {{ end }}
 #+END_SRC
+** Creating content
+:PROPERTIES:
+:EXPORT_FILE_NAME: creating-content
+:END:
+*** Linking to static files
+
+Put your images in =./hugo/static/images=
+
+Test: [[/images/lolwut.png]]
+
+{{% notice info %}}
+Each static directory needs to be whitelisted in =.gitignore= (already done for images subdir.)
+{{% /notice %}}
+
+*** Half baked ideas
+**** Export the output of code blocks and timestamp of last run
+
+ #+BEGIN_SRC emacs-lisp :tangle ./emacs/blog.el
+(defadvice org-babel-insert-result (after org-babel-record-result-timestamp)
+  (let ((code-block-params (nth 2 (org-babel-get-src-block-info)))
+        (block-name (nth 4 (org-babel-get-src-block-info))))
+    (let ((timestamp (cdr (assoc :timestamp code-block-params)))
+          (result-params (assoc :result-params code-block-params)))
+      (if (and (equal timestamp "t") 
+               (> (length block-name) 0)
+               (member "html" result-params))
+          (save-excursion
+            (goto-char (point-min))
+            (search-forward-regexp (concat "^\w*#\\+RESULTS: " 
+                                           block-name 
+                                           "\n\w*#\\+BEGIN_EXPORT html\n"))
+            (let ((beg (point)))
+              (search-forward-regexp "^\w*#\\+END_EXPORT")
+              (beginning-of-line)
+              (kill-region beg (point)))
+            (insert (format (concat "<div class=\"block-header results\">"
+                                    block-name
+                                    " - Last run: %s</div>\n")
+                            (format-time-string "%F %r")))
+            (insert (format (concat "<div class=\"block-results\" "
+                                    "id=\"results-%s\"><pre class=\"chroma\">\n") 
+                            block-name))
+            (yank)
+            (insert "</pre></div>\n"))
+        (if (equal timestamp "t")
+            (message (concat "Result timestamping requires a #+NAME: "
+                             "and a ':results html' argument.")))))))
+(ad-activate 'org-babel-insert-result)
+ #+END_SRC
+
+Output requires the code block to have all these parameters:
+
+ - =#+NAME:=
+   - A unique name for the code block ensures that the correct result
+     block will be updated.
+ - =:timestamp t=
+  - Turns on the timestamp
+ - =:exports both= 
+  - Exports both the code block itself, and it's output, to HTML.
+ - =:results html= 
+  - Formats the result as HTML.
+ - =:eval never-export= 
+  - (Optional) Makes it so the block is *not* automatically evaluated
+    on export. It has to be manually run.
+
+#+NAME: testguy
+#+BEGIN_SRC shell :results html :exports both :eval never-export :timestamp t
+whoami
+ls
+#+END_SRC
+
+Results and timestamp are exported to HTML each time the block is re-evaluated:
+
+#+RESULTS: testguy
+#+BEGIN_EXPORT html
+<div class="block-header results">testguy - Last run: 2017-10-03 06:38:02 PM</div>
+<div class="block-results" id="results-testguy"><pre class="chroma">
+ryan
+blog
+blog.org
+</pre></div>
+#+END_EXPORT
+
+** Review
+:PROPERTIES:
+:EXPORT_FILE_NAME: review
+:END:
+OK, so having read this far, I'm expecting that you now have a bit of
+an environment setup. You're not just reading this in a web browser,
+you've got Emacs open on one half of your screen, and a web browser on
+the other viewing this site. You can see the source, save any changes,
+and they livereload on your browser instantly. Nice! 
+
+Now you have your own thing going. You can delete all the rest of this
+file. Make sure you keep all of this first section, it is now /your/
+documentation for /your/ site. You are now a nomad, a wayfaring hacker,
+surviving the wastelands of NullDevia, and rebuilding anew! But
+only if you keep the instructions in this section, you'll need those!
+
+The rest of this file you can delete, or keep as a reference, but my
+narrative becomes your narrative, so edit it however you feel like.
+
+The [[Local Variables]] section includes important Emacs configuration
+parameters to setup this file for the live reload feature, so maybe
+keep that.
 
 * Front Page
 :PROPERTIES:
