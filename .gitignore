@@ -1,0 +1,7 @@
+*
+!.gitignore
+!hugo/
+!hugo/public/
+!hugo/public/*
+!hugo/public/**/*
+
