@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>rymcg.tech</title>
+    <link>https://blog.rymcg.tech/</link>
+    <description>Recent content on rymcg.tech</description>
+    <generator>Hugo -- gohugo.io</generator> 
+    <language>en-us</language>   
+     <item>
+        <title>Org-babel tests</title>
+        <link>https://blog.rymcg.tech/org-babel/</link>
+        <pubDate>Mon, 09 Oct 2017 00:00:00 -0400</pubDate> 
+        <guid>https://blog.rymcg.tech/org-babel/</guid>
+        <description> These are org-babel experiments
+Subsection parameters </description>
+      </item>
+  </channel>
+</rss>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>https://blog.rymcg.tech/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/org-babel/</loc>
+    <lastmod>2017-11-09T00:00:00-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/ox-hugo/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/emacs/def-advice/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/emacs/emacs-post-2/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/ox-hugo/license/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/ox-hugo/configuration/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/emacs/emacs-post-1/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/ox-hugo/creating-content/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/emacs/elips-tips/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/ox-hugo/review/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/book1/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/book1/chapter1/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/book1/chapter2/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/book1/chapter1/section1/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/book1/chapter2/section1/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/book1/chapter1/section2/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/book1/chapter2/section2/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/_header/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/emacs/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/tags/orgmode/</loc>
+    <lastmod>2017-11-09T00:00:00-05:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.rymcg.tech/tags/</loc>
+    <lastmod>2017-11-09T00:00:00-05:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+</urlset>
