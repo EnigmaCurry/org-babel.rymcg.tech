@@ -41,7 +41,13 @@ My configuration consists of:
 :PROPERTIES:
 :EXPORT_FILE_NAME: license
 :END:
-The software defined in this file is open source and MIT licensed:
+This software, and the contents of [[https://blog.rymcg.tech][blog.rymcg.tech]], are dual-licensed
+under the [[https://creativecommons.org/licenses/by/4.0/][Creative Commons Attribution 4.0 License]], and the MIT
+license. You may use either license at your sole discretion.
+
+For example, you may want to choose [[https://creativecommons.org/licenses/by/4.0/][CC-by]] in order to copy an article
+or section of this file to another blog or website, while [[https://github.com/enigmacurry/rymcg.tech/fork][forking this
+project]] might be more suitable with the terms of the MIT license.
 
 #+BEGIN_QUOTE
 Copyright (c) 2017 EnigmaCurry - http://blog.rymcg.tech/ox-hugo
@@ -65,7 +71,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #+END_QUOTE
 
-The theme files (as configured) are also MIT:
+The theme files distributed with the static HTML are licensed MIT. 
+
+(If you use a different theme, you can remove this notice:)
 
 #+BEGIN_QUOTE
 Copyright (c) 2014 Grav 
@@ -90,6 +98,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #+END_QUOTE
+
 ** Configuration
 :PROPERTIES:
 :EXPORT_FILE_NAME: configuration
