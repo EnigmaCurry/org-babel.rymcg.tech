@@ -8,10 +8,107 @@ directly from its pages. This is /executable/ documentation, also
 called /literate programming/.
 
 Documentation is often an after thought, and suffers for it. Instead
-of figuring out how to do something, and then writing about it; write
-about something, and thereby figure it out!
+of figuring out how to do something and /then/ writing about it; write
+about something, and /thereby/ figure it out!
 
-* Recursively load other spell books
+* Flow
+
+What forms does computer documentation take on? Let's think about it:
+
+ - Software projects 
+   - A README file that mixes prose expository text with installation
+     procedures in the form of the commands to type, sometimes linking
+     to a seperate script file to run, or sometimes a code block to
+     cut and paste directly into the terminal.
+ - Technical blog posts
+   - A webpage that mixes prose text with commands to type/paste into
+     your terminal.
+   - Often omits important steps the author didn't bother writing
+     about. (libraries to install, envrionment variables set, etc.)
+ - A PDF, or printed book
+   - Text you /have to retype/, with syntactical mistranslations
+     occuring at your own peril.
+
+Think about the author's process for any of the above. They are
+usually describing a process of something already precsribed (you
+usually only write a blog post /after/ you know what you want to say.)
+A blog post that describes a shell command to run, is one that the
+author (hopefully) tried out in their terminal beforehand, examined
+all the edge cases, and then pasted into their webpage for you to run.
+This is perfectly sensible, but there is another, more efficient, and
+reliable way.
+
+When you start a project, put the blog post process up at the front,
+/before/ you ever open your terminal, /before/ you even know anything
+about the thing you're potentially describing. Describe what you
+/want/ to do in plain English (or your native lingo.) At this stage
+every post is a /potential/ blog post that remains in draft. You
+should record every step of your discovery process through natural
+language and code blocks. An editor like Emacs/org-babel can actually
+/run/ your code blocks, you don't really even need a regular terminal
+at all. You can still try things out in your terminal first (I'm a big
+fan of [[https://github.com/kyagi/shell-pop-el][shell-pop]],) but always record each logical step in org-babel so
+that the steps are /reproducible/.
+
+Later on, after this discovery process, you can edit the posts and
+polish them for publication. The magical twist to all this is that the
+final documentation becomes executable itself, simply by opening the
+file in Emacs org-mode, and running each code block with =C-c C-c=,
+and you execute the code again. Since the code is executed directly
+from within your documentation, it's also not possible for it to be
+out of date.
+
+Open up Emacs in a fresh virtual machine, and you can quickly test
+things from a potential reader's perspective, and to ensure everything
+still works in the clean environment. Plus, no (mis)typing things, and
+no copy and pasting. It's better than a shell script too, because it's
+interactive. You get to see the output of each block, and react to it
+before executing the next block (just like you would in terminal.)
+Maybe it had a problem, and you have to tweak the code block and run
+it again a few times. If you get into this flowstate of writing and
+testing your code in logical blocks like this, /the documentation
+literally writes itself!/
+
+You have now manifested your will simply by describing it - A
+spellbook, for you to record your own technomancy, including chapters
+containing the exact processes of recreating all of your described
+technology, as well as how to recreate the book itself.
+
+* Setup
+** Dependencies
+My configuration consists of:
+
+ - [[https://www.gnu.org/software/emacs/][Emacs]] 25
+ - [[https://www.gnu.org/software/emacs/][Org Mode]] 9 from the [[http://orgmode.org/elpa.html][project repos]]
+ - [[https://gohugo.io/][Hugo]] 0.30+
+
+** Bootstrap
+Put the following snippet someplace in your Emacs init scripts: 
+
+#+NAME: example-emacs-init
+#+BEGIN_SRC emacs-lisp
+;; Load rymcg.tech.el which is tangled from main.org:
+(let ((rymcg/init (expand-file-name "~/.emacs.d/rymcg.tech.el")))
+  (if (file-exists-p rymcg/init)
+    (load-file rymcg/init)))
+#+END_SRC
+
+The above snippet is the only manual bootstrapping you'll need, all
+the rest of the code blocks are handled via org-babel. In Emacs, press
+=C-c C-v t= (org-babel-tangle) which will automatically create
+=~/.emacs.d/rymcg.tech.el= which will contain the rest of the setup.
+Restart Emacs to load the configuration, or just eval the following if
+you don't want to restart:
+
+#+BEGIN_SRC emacs-lisp
+(load-library (expand-file-name "~/.emacs.d/rymcg.tech.el"))
+#+END_SRC
+
+You need to re-tangle anytime you make changes to this file, but there
+is an on-save hook to do this automatically (take a look in the Local
+Variables section below.)
+
+* Recursively load other spellbooks
 
 Each spellbook is a single Org file. Each spellbook contains org-babel
 code blocks and sections for ox-hugo to render to Markdown. Each
