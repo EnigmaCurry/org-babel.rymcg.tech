@@ -434,12 +434,12 @@ rymcg.tech
 Import the theme:
 
 #+NAME: hugo-import-theme
- #+BEGIN_SRC shell :dir ./hugo :results none
+#+BEGIN_SRC shell :dir ./hugo :results none
 if [ ! -d themes/docdock ]; then
     mkdir -p themes
     git submodule add -f https://github.com/EnigmaCurry/hugo-theme-docdock themes/docdock
 fi
- #+END_SRC
+#+END_SRC
 
 Customize the header for each page, include any [[https://gohugo.io/variables/page/][Hugo Page Variables]]:
 

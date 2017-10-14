@@ -1,0 +1,52 @@
+#+HUGO_BASE_DIR: hugo
+#+HUGO_WEIGHT: auto
+#+OPTIONS: broken-links:mark
+
+This is a spellbook of computational recipes. You can study it as you
+would a regular book, but you can also recite magical incantations
+directly from its pages. This is /executable/ documentation, also
+called /literate programming/.
+
+Documentation is often an after thought, and suffers for it. Instead
+of figuring out how to do something, and then writing about it; write
+about something, and thereby figure it out!
+
+* Recursively load other spell books
+
+Each spellbook is a single Org file. Each spellbook contains org-babel
+code blocks and sections for ox-hugo to render to Markdown. Each
+spellbook can load other spellbooks and evaluate specific named code
+blocks therein, thus allowing you to load all your spellbooks from a
+single main spellbook:
+
+#+NAME: render
+#+BEGIN_SRC emacs-lisp
+(let ((transmute-spellbooks
+       (lambda (spellbook-eval-lists)
+         "Transmute list of spellbooks and eval named code blocks"
+         (dolist (book-eval-list spellbook-eval-lists)
+           (save-window-excursion
+             ;; Open the spellbook:
+             (find-file (car book-eval-list))
+             ;; Tangle code blocks to the filesystem:
+             (org-babel-tangle-file (buffer-file-name))
+             ;; Render all sections to markdown:
+             (org-hugo-export-subtree-to-md 1)
+             ;; Eval specified code blocks
+             (dolist (codeblock (cdr book-eval-list))
+               (org-babel-goto-named-src-block codeblock)
+               (let ((org-confirm-babel-evaluate nil))
+                 (org-babel-execute-src-block-maybe))))))))
+
+  ;; Transmute all the spell books, starting with this one:
+  (funcall transmute-spellbooks
+           '(("./main.org")
+             ("./blog.org" "testblock"))))
+#+END_SRC
+* COMMENT Local Variables                    :ARCHIVE:
+# Local Variables:
+# fill-column: 70
+# eval: (auto-fill-mode 1)
+# eval: (toggle-truncate-lines 1)
+# eval: (add-hook 'after-save-hook #'org-hugo-export-subtree-to-md-after-save :append :local)
+# End:
