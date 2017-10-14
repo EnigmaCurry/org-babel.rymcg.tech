@@ -108,42 +108,70 @@ You need to re-tangle anytime you make changes to this file, but there
 is an on-save hook to do this automatically (take a look in the Local
 Variables section below.)
 
-* Recursively load other spellbooks
+* Transmutation
 
-Each spellbook is a single Org file. Each spellbook contains org-babel
-code blocks and sections for ox-hugo to render to Markdown. Each
-spellbook can load other spellbooks and evaluate specific named code
-blocks therein, thus allowing you to load all your spellbooks from a
-single main spellbook:
+Each spellbook is a single Org file which can load other spellbooks.
+Each spellbook contains org-babel code blocks, and org-mode subtrees
+for ox-hugo to render to Markdown. When a spellbook references another
+spell book, it can specify a named code block therein to evaluate,
+giving each spellbook the power to describe its own additional render
+process. main.org lists all the other spellbooks and starts off the
+build process for the entire site.
 
-#+NAME: render
-#+BEGIN_SRC emacs-lisp
-(let ((transmute-spellbooks
-       (lambda (spellbook-eval-lists)
-         "Transmute list of spellbooks and eval named code blocks"
-         (dolist (book-eval-list spellbook-eval-lists)
-           (save-window-excursion
-             ;; Open the spellbook:
-             (find-file (car book-eval-list))
-             ;; Tangle code blocks to the filesystem:
-             (org-babel-tangle-file (buffer-file-name))
-             ;; Render all sections to markdown:
-             (org-hugo-export-subtree-to-md 1)
-             ;; Eval specified code blocks
-             (dolist (codeblock (cdr book-eval-list))
-               (org-babel-goto-named-src-block codeblock)
-               (let ((org-confirm-babel-evaluate nil))
-                 (org-babel-execute-src-block-maybe))))))))
+List all the spellbooks: 
 
-  ;; Transmute all the spell books, starting with this one:
-  (funcall transmute-spellbooks
-           '(("./main.org")
-             ("./blog.org" "testblock"))))
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
+(setq rymcg/spellbook-dir (expand-file-name "~/git/rymcg.tech"))
+(setq rymcg/spellbooks '(("blog.org")
+                         ("license.org")))
 #+END_SRC
+
+/Transmutation/ describes the combined process of reading a spellbook,
+tangling its code blocks, and converting the ox-hugo posts from Org to
+markdown:
+
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
+(defun rymcg/transmute-spellbook (path &optional eval-blocks no-tangle)
+  (let ((default-directory rymcg/spellbook-dir))
+    (if (not (file-exists-p path))
+      (error (concat "Spellbook does not exist: " path)))
+    (save-window-excursion
+      (find-file path)
+      ;; Tangle code blocks to the filesystem:
+      (unless no-tangle
+        (org-babel-tangle))
+      ;; Render all sections to markdown:
+      (org-hugo-export-subtree-to-md 1)
+      ;; Eval specified code blocks
+      (dolist (codeblock eval-blocks)
+        (org-babel-goto-named-src-block codeblock)
+        (let ((org-confirm-babel-evaluate nil))
+          (org-babel-execute-src-block-maybe))))))
+
+(defun rymcg/transmute-all ()
+  (interactive)
+  (let ((func (lambda nil (dolist (spellbook-args rymcg/spellbooks)
+                            (apply 'rymcg/transmute-spellbook spellbook-args))
+                (message "Done"))))
+    ;; Use sound if available:
+    (if (fboundp 'audible-success)
+        (audible-success (funcall func))
+      (funcall func))))
+#+END_SRC
+
+You can now build the site with =M-x rymcg/transmute-all=.
+
 * COMMENT Local Variables                    :ARCHIVE:
+This section sets up our Emacs on-save hooks. When you open this file
+Emacs should ask you if you want to enable these variables. You should
+press =!= when prompted, that way it won't ask you again unless you
+change these:
 # Local Variables:
 # fill-column: 70
 # eval: (auto-fill-mode 1)
 # eval: (toggle-truncate-lines 1)
 # eval: (add-hook 'after-save-hook #'org-hugo-export-subtree-to-md-after-save :append :local)
+# eval: (add-hook 'after-save-hook #'org-babel-tangle :append :local)
 # End:
+
+
