@@ -2,6 +2,14 @@
 #+HUGO_WEIGHT: auto
 #+OPTIONS: broken-links:mark
 
+* Spellbook
+:PROPERTIES:
+:EXPORT_HUGO_SECTION: spellbook
+:END:
+** Make your website like this
+:PROPERTIES:
+:EXPORT_FILE_NAME: _index
+:END:
 This is a spellbook of computational recipes. You can study it, as you
 would a regular book, but you can also recite magical incantations
 directly from its pages. This is /executable/ documentation, also
@@ -12,139 +20,154 @@ Documentation is often an after thought, and suffers for it. Instead
 of figuring out how to do something and /then/ writing about it; write
 about something, and /thereby/ figure it out!
 
-* Flow
+** Flow
+:PROPERTIES:
+:EXPORT_FILE_NAME: flow
+:END:
 
-What is your (work)flow for reading and writing documentation? Does it
-seem like /work/? Or do things just /flow/? Let's think about a few
-different mediums, and how they often present their documentation:
+ What is your (work)flow for reading and writing documentation? Does it
+ seem like /work/? Or do things just /flow/? Let's think about a few
+ different mediums, and how they often present their documentation:
 
- - Small software projects:
+  - Small software projects:
 
-   - Minimally, a README file that mixes prose expository text with
-     installation procedures, in the form of the commands to type.
+    - Minimally, a README file that mixes prose expository text with
+      installation procedures, in the form of the commands to type.
 
-    - Sometimes there is a link to a seperate script file to run, or
-      sometimes a code block to cut and paste directly into the
-      terminal.
+     - Sometimes there is a link to a seperate script file to run, or
+       sometimes a code block to cut and paste directly into the
+       terminal.
 
- - Big software projects
+  - Big software projects
 
-   - Documnetation websites are nice and pretty, and are usually
-     searchable, but there is no integration with the terminal. You're
-     still stuck retyping commands (or copy and pasting) into your
-     shell.
+    - Documnetation websites are nice and pretty, and are usually
+      searchable, but there is no integration with the terminal. You're
+      still stuck retyping commands (or copy and pasting) into your
+      shell.
 
- - Technical blog posts:
+  - Technical blog posts:
 
-   - A webpage that mixes prose text with commands to type/paste into
-     your terminal, or into config files (in files or directory trees
-     that might not exist yet.)
+    - A webpage that mixes prose text with commands to type/paste into
+      your terminal, or into config files (in files or directory trees
+      that might not exist yet.)
 
-   - Often omits important steps the author didn't bother writing
-     about. (Libraries to install, envrionment variables set, etc.)
+    - Often omits important steps the author didn't bother writing
+      about. (Libraries to install, envrionment variables set, etc.)
 
- - A PDF, or printed book
+  - A PDF, or printed book
 
-   - Text you /have to retype/, with syntactical mistranslations
-     occuring at your own peril.
+    - Text you /have to retype/, with syntactical mistranslations
+      occuring at your own peril.
 
-   - Sometimes difficult to tell if you're reading the latest version.
+    - Sometimes difficult to tell if you're reading the latest version.
 
-Think about the author's process for writing any of the above. They
-are usually writing a process of something they've already figured
-out, and since they want to share it with you, they are now writing
-about it. Take for example, a blog post that describes a series of
-shell commands that the reader is expected to run. Usually, the writer
-figures out the proper commands in his shell, examines the edges
-cases, refiddles things a few times, then copies the final tested
-commands back into his document, with the reader expected to do the
-exact opposite. This is perfectly sensible, but there is another, more
-efficient, and reliable way.
+ Think about the author's process for writing any of the above. They
+ are usually writing a process of something they've already figured
+ out, and since they want to share it with you, they are now writing
+ about it. Take for example, a blog post that describes a series of
+ shell commands that the reader is expected to run. Usually, the writer
+ figures out the proper commands in his shell, examines the edges
+ cases, refiddles things a few times, then copies the final tested
+ commands back into his document, with the reader expected to do the
+ exact opposite. This is perfectly sensible, but there is another, more
+ efficient, and reliable way.
 
-When you start a project, put the blog post process up at the front,
-/before/ you ever open your terminal, /before/ you even know anything
-about the thing you're potentially describing. Describe what you
-/want/ to do in plain English (or your native lingo.) At this stage,
-every post is a /potential/ blog post. Write about every idea you
-have, even if you don't know if it will actually work out, and let the
-post linger in draft-status indefinitely. You should record every step
-of your discovery process through natural language and code blocks. An
-editor like Emacs, can actually /run/ code blocks directly for you
-(optionally recording STDOUT back into your document too,) so you
-don't really even need a regular terminal at all. You can still try
-things out in your terminal first if you want to, (I'm a big fan of
-[[https://github.com/kyagi/shell-pop-el][shell-pop]]) but always record each logical step /before/ moving on,
-with the aim of making the whole process /reproducible/.
+ When you start a project, put the blog post process up at the front,
+ /before/ you ever open your terminal, /before/ you even know anything
+ about the thing you're potentially describing. Describe what you
+ /want/ to do in plain English (or your native lingo.) At this stage,
+ every post is a /potential/ blog post. Write about every idea you
+ have, even if you don't know if it will actually work out, and let the
+ post linger in draft-status indefinitely. You should record every step
+ of your discovery process through natural language and code blocks. An
+ editor like Emacs, can actually /run/ code blocks directly for you
+ (optionally recording STDOUT back into your document too,) so you
+ don't really even need a regular terminal at all. You can still try
+ things out in your terminal first if you want to, (I'm a big fan of
+ [[https://github.com/kyagi/shell-pop-el][shell-pop]]) but always record each logical step /before/ moving on,
+ with the aim of making the whole process /reproducible/.
 
-Later on, after this discovery process concludes (yea right..), you
-can edit the posts, and polish them off for publication. The magical
-twist to all this, is that the final documentation becomes executable
-itself. Simply by opening the file in Emacs org-mode, and running each
-code block with =C-c C-c=, you execute the same code again. Since the
-code is executed directly from within your documentation, it's also
-not possible for the docs to be out of date.
+ Later on, after this discovery process concludes (yea right..), you
+ can edit the posts, and polish them off for publication. The magical
+ twist to all this, is that the final documentation becomes executable
+ itself. Simply by opening the file in Emacs org-mode, and running each
+ code block with =C-c C-c=, you execute the same code again. Since the
+ code is executed directly from within your documentation, it's also
+ not possible for the docs to be out of date.
 
-If you open up Emacs in a fresh virtual machine, you can quickly test
-things from a potential reader's perspective, and to ensure everything
-still works in a clean environment. Plus, no (mis)typing things, and
-no copy and pasting. It's better than a shell script too, because it's
-interactive. You get to see the output of each block, and react to it
-before executing the next block (just like you would typing in a
-terminal.) Maybe the command fails, and you have to tweak the code
-block, and run it again a few times before running the next code
-block, and so on. If you get into this flowstate, of writing and
-testing your code in logical blocks like this, /the documentation
-literally writes itself!/
+ If you open up Emacs in a fresh virtual machine, you can quickly test
+ things from a potential reader's perspective, and to ensure everything
+ still works in a clean environment. Plus, no (mis)typing things, and
+ no copy and pasting. It's better than a shell script too, because it's
+ interactive. You get to see the output of each block, and react to it
+ before executing the next block (just like you would typing in a
+ terminal.) Maybe the command fails, and you have to tweak the code
+ block, and run it again a few times before running the next code
+ block, and so on. If you get into this flowstate, of writing and
+ testing your code in logical blocks like this, /the documentation
+ literally writes itself!/
 
-As for your readers, they don't have to know anything about this, if
-you don't want them to. The HTML version looks just like any other web
-based documentation, and they can copy and paste things just like
-they're used to, or, if they're savy, they can download your provided
-Org source files, and then they can execute the commands from Emacs,
-just like you do! (You might think this would lead to your readers
-becoming lazy. If it's so easy to run, why even read it? Hopefully,
-providing a nice looking web version makes it more appealing to read,
-and if you get really familiar with a process, it's nice to have the
-/option/ for being lazy!)
+ As for your readers, they don't have to know anything about this, if
+ you don't want them to. The HTML version looks just like any other web
+ based documentation, and they can copy and paste things just like
+ they're used to, or, if they're savy, they can download your provided
+ Org source files, and then they can execute the commands from Emacs,
+ just like you do! (You might think this would lead to your readers
+ becoming lazy. If it's so easy to run, why even read it? Hopefully,
+ providing a nice looking web version makes it more appealing to read,
+ and if you get really familiar with a process, it's nice to have the
+ /option/ for being lazy!)
 
-You have now manifested your will, simply by describing it. You also
-have acquired a copy of another mage's spellbook, with ample margins
-for your own notes and ammendments, and with many blank pages left,
-with which to record your own technomancy. It includes chapters to
-instantiate all of your described technologies, and the exact process
-of its own duplication.
+ You have now manifested your will, simply by describing it. You also
+ have acquired a copy of another mage's spellbook, with ample margins
+ for your own notes and ammendments, and with many blank pages left,
+ with which to record your own technomancy. It includes chapters to
+ instantiate all of your described technologies, and the exact process
+ of its own duplication.
 
-* Setup
-** Dependencies
-Get familiar with the following, and install yourself:
+** Setup
+:PROPERTIES:
+:EXPORT_HUGO_SECTION: spellbook/setup
+:END:
+*** Dependencies
+:PROPERTIES:
+:EXPORT_FILE_NAME: dependencies
+:END:
+ Get familiar with the following, and install yourself:
 
- - [[https://www.gnu.org/software/emacs/][Emacs]] 25+
-  - The extensible editor, everything runs inside it.
- - [[https://github.com/jwiegley/use-package][use-package]] (can install from [[https://melpa.org/#/use-package][melpa]])
-  - Declarative Emacs packaging.
- - [[https://www.gnu.org/software/emacs/][Org Mode]] 9+ from the [[http://orgmode.org/elpa.html][project repos]]
-  - Does a lot of stuff, but for our purposes it is used for
-    hierarchical note taking, and for [[http://org-babel.readthedocs.io/en/latest/][org-babel]] code blocks.
- - [[https://gohugo.io/][Hugo]] 0.30+
-  - Builds a complete static website from Markdown content. We convert
-    Org source files to Markdown, before running this guy.
+  - [[https://www.gnu.org/software/emacs/][Emacs]] 25+
+   - The extensible editor, everything runs inside it.
+  - [[https://github.com/jwiegley/use-package][use-package]] (can install from [[https://melpa.org/#/use-package][melpa]])
+   - Declarative Emacs packaging.
+  - [[https://www.gnu.org/software/emacs/][Org Mode]] 9+ from the [[http://orgmode.org/elpa.html][project repos]]
+   - Does a lot of stuff, but for our purposes it is used for
+     hierarchical note taking, and for [[http://org-babel.readthedocs.io/en/latest/][org-babel]] code blocks.
+  - [[https://gohugo.io/][Hugo]] 0.30+
+   - Builds a complete static website from Markdown content. We convert
+     Org source files to Markdown, before running this guy.
 
-These dependencies are automatically set up below:
+ These dependencies are automatically set up below:
 
- - [[https://ox-hugo.scripter.co/][ox-hugo]] - Converts our Org sources to Hugo consumable Markdown.
+  - [[https://ox-hugo.scripter.co/][ox-hugo]] - Converts our Org sources to Hugo consumable Markdown.
 
-** Install
-You should [[https://github.com/EnigmaCurry/rymcg.tech/fork][fork this repository on github]], then clone it to your
-computer. This example just clones my version directly:
+*** Install
+:PROPERTIES:
+:EXPORT_FILE_NAME: install
+:END:
+ You should [[https://github.com/EnigmaCurry/rymcg.tech/fork][fork this repository on github]], then clone it to your
+ computer. This example just clones my version directly:
 
-#+BEGIN_EXAMPLE
+ #+BEGIN_EXAMPLE
 mkdir -p ~/git
 cd ~/git
 git clone https://github.com/EnigmaCurry/rymcg.tech.git
-#+END_EXAMPLE
+ #+END_EXAMPLE
 
-** Bootstrap
-Copy the following snippet someplace in your Emacs init scripts: 
+*** Bootstrap
+:PROPERTIES:
+:EXPORT_FILE_NAME: bootstrap
+:END:
+ Copy the following snippet someplace in your Emacs init scripts: 
 
 #+NAME: example-emacs-init
 #+BEGIN_SRC emacs-lisp
@@ -176,7 +199,10 @@ happen automatically whenever you save this file. (See the notes on
 enabling this in the [[Local Variables]] section at the bottom of
 README.org.)
 
-** Configuration
+*** Configuration
+:PROPERTIES:
+:EXPORT_FILE_NAME: configuration
+:END:
 The code from the previous section, that you pasted into your Emacs
 init script, loads a file called =rymcg.tech.el=. That file only
 exists because it's defined here in this file, and gets (re)created
@@ -213,9 +239,24 @@ Customize the path to your hugo binary, if it's not already on your PATH:
 (setq rymcg/hugo-bin "hugo")
 #+END_SRC
 
-This is the host and port the Hugo dev server runs on:
+Configure the hugo dev server:
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
+;; hugo dev server:
 (setq rymcg/hugo-server-url "http://localhost:1313")
+(defun rymcg/hugo-server ()
+  "Start hugo server in an inferior shell"
+  (interactive)
+  (let ((eshell-buffer-name (concat "*hugo-server-" rymcg/spellbook-hugo-root "*")))
+    (if (bufferp (get-buffer eshell-buffer-name))
+        (kill-buffer eshell-buffer-name))
+    (eshell)
+    (eshell-return-to-prompt)
+    (insert (concat "cd " rymcg/spellbook-hugo-root))
+    (eshell-send-input)
+    (insert (concat rymcg/hugo-bin " server -D --navigateToChanged"))
+    (eshell-send-input)
+    (browse-url rymcg/hugo-server-url)
+    (message eshell-buffer-name)))
 #+END_SRC
 
 Use-package will automatically download ox-hugo from MELPA:
@@ -226,7 +267,10 @@ Use-package will automatically download ox-hugo from MELPA:
   :after ox)
 #+END_SRC
 
-* Transmutation
+** Transmutation
+:PROPERTIES:
+:EXPORT_FILE_NAME: transmutation
+:END:
 
 Each spellbook is a single Org file which can load other spellbooks.
 Each spellbook contains org-babel code blocks, and sections marked for
@@ -239,7 +283,7 @@ Here is the list all of the spellbooks enabled for transmutation:
 
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
 ;; List of all the spell books to transmute:
-(setq rymcg/spellbooks '(("main.org" ("hugo-import-theme"))
+(setq rymcg/spellbooks '(("README.org" ("hugo-import-theme"))
                          ("license.org")))
 #+END_SRC
 
@@ -283,14 +327,19 @@ posts from Org to markdown, and building the HTML site with hugo:
 
 You can now build the site with =M-x rymcg/transmute-all=.
 
-* Hugo Template
+** Hugo
+:PROPERTIES:
+:EXPORT_HUGO_SECTION: spellbook/hugo
+:END:
 
-This section tangles the hugo configuration, templates, styles, and themes:
+*** Hugo config file
+:PROPERTIES:
+:EXPORT_FILE_NAME: config
+:END:
 
-** Hugo config file
-Here's the main hugo config file:
+ Here's the main hugo config file:
 
-#+BEGIN_SRC yml :tangle ./hugo/config.yml :eval no :mkdirp yes
+ #+BEGIN_SRC yml :tangle ./hugo/config.yml :eval no :mkdirp yes
 baseURL: "https://blog.rymcg.tech/"
 languageCode: "en-us"
 DefaultContentLanguage: "en"
@@ -318,29 +367,32 @@ outputs:
 mediaTypes:
   "text/plain":
     suffix: "org"
-#+END_SRC
+ #+END_SRC
 
-** Hugo template
+*** Hugo templates
+:PROPERTIES:
+:EXPORT_FILE_NAME: templates
+:END:
 
-Create the site header:
+ Create the site header:
 
-#+BEGIN_SRC markdown :mkdirp yes :eval no :tangle ./hugo/content/_header.md
+ #+BEGIN_SRC markdown :mkdirp yes :eval no :tangle ./hugo/content/_header.md
 rymcg.tech
-#+END_SRC
+ #+END_SRC
 
-Import the theme:
+ Import the theme:
 
-#+NAME: hugo-import-theme
-#+BEGIN_SRC shell :dir ./hugo :results none
+ #+NAME: hugo-import-theme
+ #+BEGIN_SRC shell :dir ./hugo :results none
 if [ ! -d themes/docdock ]; then
     mkdir -p themes
     git submodule add -f https://github.com/EnigmaCurry/hugo-theme-docdock themes/docdock
 fi
-#+END_SRC
+ #+END_SRC
 
-Customize the header for each page, include any [[https://gohugo.io/variables/page/][Hugo Page Variables]]:
+ Customize the header for each page, include any [[https://gohugo.io/variables/page/][Hugo Page Variables]]:
 
-#+BEGIN_SRC html :mkdirp yes :tangle ./hugo/layouts/partials/custom-post-header.html
+ #+BEGIN_SRC html :mkdirp yes :tangle ./hugo/layouts/partials/custom-post-header.html
 <div id="post-meta">
 {{if $.Param "draft"}}
    <div class="notices info">This page is an unpublished draft.</div>
@@ -353,13 +405,16 @@ Customize the header for each page, include any [[https://gohugo.io/variables/pa
   {{if ne .Lastmod .Date}}(<b>last update: {{.Lastmod.Format "January 1, 2006"}}</b>){{end}}<br/>
 {{end}}
 </div>
-#+END_SRC
+ #+END_SRC
 
-** CSS 
+*** CSS 
+:PROPERTIES:
+:EXPORT_FILE_NAME: css
+:END:
 
-Create our own theme variant:
+ Create our own theme variant:
 
-#+BEGIN_SRC css :mkdirp yes :eval no :tangle ./hugo/static/css/theme-rymcg.css
+ #+BEGIN_SRC css :mkdirp yes :eval no :tangle ./hugo/static/css/theme-rymcg.css
 :root{
     --MAIN-BACK-color:#ddd;
     --MAIN-TXT-color: #000;
@@ -486,12 +541,12 @@ div#body-inner pre {
 #body .nav:hover {
     background-color: var(--NAV-HOVER-color);
 }
-#+END_SRC
+ #+END_SRC
 
-Most syntax highlighting is done with Chroma, which is builtin to
-hugo. The site uses the =perldoc= theme:
+ Most syntax highlighting is done with Chroma, which is builtin to
+ hugo. The site uses the =perldoc= theme:
 
-#+BEGIN_SRC css :tangle ./hugo/static/css/theme-rymcg.css
+ #+BEGIN_SRC css :tangle ./hugo/static/css/theme-rymcg.css
 /* perldoc syntax highlight style */
 /* Background */ .chroma { background-color: #eeeedd }
 /* Error */ .chroma .err { color: #a61717; background-color: #e3d2d2 }
@@ -554,12 +609,12 @@ hugo. The site uses the =perldoc= theme:
 /* GenericSubheading */ .chroma .gu { color: #800080; font-weight: bold }
 /* GenericTraceback */ .chroma .gt { color: #aa0000 }
 /* TextWhitespace */ .chroma .w { color: #bbbbbb }
-#+END_SRC
+ #+END_SRC
 
-As a fallback, highlight.js is used for blocks that chroma can't
-handle. Here's a slight mod of the =purebasic= theme:
+ As a fallback, highlight.js is used for blocks that chroma can't
+ handle. Here's a slight mod of the =purebasic= theme:
 
-#+BEGIN_SRC css :tangle ./hugo/static/css/hybrid.css
+ #+BEGIN_SRC css :tangle ./hugo/static/css/hybrid.css
 .hljs {
 	background: #eeeedd !important;
 	display: block;
@@ -595,9 +650,12 @@ handle. Here's a slight mod of the =purebasic= theme:
 .hljs-emphasis {
 	font-style: italic;
 }
-#+END_SRC
+ #+END_SRC
 
-** Code block headers
+*** Code block headers
+:PROPERTIES:
+:EXPORT_FILE_NAME: code-block-headers
+:END:
 When reading code blocks in Org file source it's pretty easy to see
 what file it's referring to, by looking at the =:tangle= parameter:
 
@@ -665,13 +723,16 @@ HTML.
 #+RESULTS:
 : org-hugo-export-subtree-to-md
 
-** RSS
+*** RSS
+:PROPERTIES:
+:EXPORT_FILE_NAME: rss
+:END:
 Hugo ships with it's own [[https://gohugo.io/templates/rss/#the-embedded-rss-xml][RSS template]], but let's create our own:
 
  - Only include the 30 most recent entries.
  - Display in reverse chronological order.
  - Include any pages that have a date, /including =_index= pages/.
-  - The date must be set in the front matter params, by ox-hugo.
+ - The date must be set in the front matter params, by ox-hugo.
 
 #+BEGIN_SRC xml :mkdirp yes :tangle ./hugo/layouts/rss.xml
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -703,24 +764,24 @@ Add a link to the RSS in the page head:
 {{ end }}
 #+END_SRC
 
-* Creating content
-  :PROPERTIES:
-  :EXPORT_FILE_NAME: creating-content
-  :END:
-** Linking to static files
+** Creating content
+   :PROPERTIES:
+   :EXPORT_FILE_NAME: creating-content
+   :END:
+*** Linking to static files
 
-Put your images in =./hugo/static/images=
+ Put your images in =./hugo/static/images=
 
-Test: [[/images/lolwut.png]]
+ Test: [[/images/lolwut.png]]
 
-{{% notice info %}}
-Each static directory needs to be whitelisted in =.gitignore= (already done for images subdir.)
-{{% /notice %}}
+ {{% notice info %}}
+ Each static directory needs to be whitelisted in =.gitignore= (already done for images subdir.)
+ {{% /notice %}}
 
-* Half baked ideas
-** Export the output of code blocks and timestamp of last run
+** Half baked ideas
+*** Export the output of code blocks and timestamp of last run
 
-#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.rymcg.tech.el
+ #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.rymcg.tech.el
 (defadvice org-babel-insert-result (after org-babel-record-result-timestamp)
   (let ((code-block-params (nth 2 (org-babel-get-src-block-info)))
         (block-name (nth 4 (org-babel-get-src-block-info))))
@@ -751,40 +812,40 @@ Each static directory needs to be whitelisted in =.gitignore= (already done for 
             (message (concat "Result timestamping requires a #+NAME: "
                              "and a ':results html' argument.")))))))
 (ad-activate 'org-babel-insert-result)
-#+END_SRC
+ #+END_SRC
 
-Output requires the code block to have all these parameters:
+ Output requires the code block to have all these parameters:
 
- - =#+NAME:=
-   - A unique name for the code block ensures that the correct result
-     block will be updated.
- - =:timestamp t=
-  - Turns on the timestamp
- - =:exports both= 
-  - Exports both the code block itself, and it's output, to HTML.
- - =:results html= 
-  - Formats the result as HTML.
- - =:eval never-export= 
-  - (Optional) Makes it so the block is *not* automatically evaluated
-    on export. It has to be manually run.
+  - =#+NAME:=
+    - A unique name for the code block ensures that the correct result
+      block will be updated.
+  - =:timestamp t=
+   - Turns on the timestamp
+  - =:exports both= 
+   - Exports both the code block itself, and it's output, to HTML.
+  - =:results html= 
+   - Formats the result as HTML.
+  - =:eval never-export= 
+   - (Optional) Makes it so the block is *not* automatically evaluated
+     on export. It has to be manually run.
 
-#+NAME: testguy
-#+BEGIN_SRC shell :results html :exports both :eval never-export :timestamp t
+ #+NAME: testguy
+ #+BEGIN_SRC shell :results html :exports both :eval never-export :timestamp t
 whoami
 ls
-#+END_SRC
+ #+END_SRC
 
-Results and timestamp are exported to HTML each time the block is re-evaluated:
+ Results and timestamp are exported to HTML each time the block is re-evaluated:
 
-#+RESULTS: testguy
-#+BEGIN_EXPORT html
-<div class="block-header results">testguy - Last run: 2017-10-03 06:38:02 PM</div>
-<div class="block-results" id="results-testguy"><pre class="chroma">
-ryan
-blog
-blog.org
-</pre></div>
-#+END_EXPORT
+ #+RESULTS: testguy
+ #+BEGIN_EXPORT html
+ <div class="block-header results">testguy - Last run: 2017-10-03 06:38:02 PM</div>
+ <div class="block-results" id="results-testguy"><pre class="chroma">
+ ryan
+ blog
+ blog.org
+ </pre></div>
+ #+END_EXPORT
 
 * COMMENT Local Variables                    :ARCHIVE:
 This section sets up our Emacs on-save hooks. When you open this file
