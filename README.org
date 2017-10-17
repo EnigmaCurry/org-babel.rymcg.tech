@@ -148,48 +148,73 @@ The above snippet is the only manual bootstrapping you'll need to copy
 and paste, all the rest of the code blocks stay in this file (or one
 of the linked files in this repository) and are exported via
 org-babel. With this file open in Emacs, press =C-c C-v t=
-(org-babel-tangle) which will automatically create
-=~/.emacs.d/rymcg.tech.el= which will loads the rest of the setup
-described here. Now restart Emacs to load the configuration, or just
-eval the following if you don't want to restart:
+(org-babel-tangle) which will automatically create the file
+=~/.emacs.d/rymcg.tech.el= (this file creation process is called
+/tangling/, in org-babel parlance). After tangling, restart Emacs to
+load the configuration, or just eval the following if you don't want
+to restart:
 
 #+BEGIN_SRC emacs-lisp
 (load-library (expand-file-name "~/.emacs.d/rymcg.tech.el"))
 #+END_SRC
 
 You can put your cursor anywhere inside the above code block, and
-press =C-c C-c= to evaluate its contents, but this will only affect
-your current Emacs session, and won't be permanent until you retangle.
-You manually retangle anytime by pressing =C-c C-v t=, but this can
-also happen automatically whenever you save this file. (See the notes
-on enabling this in the [[Local Variables]] section at the bottom of
+press =C-c C-c= to evaluate its contents. Evaluating only affects your
+current Emacs session, and won't be permanent until you tangle. You
+can manually retangle anytime (press =C-c C-v t=), but this can also
+happen automatically whenever you save this file. (See the notes on
+enabling this in the [[Local Variables]] section at the bottom of
 README.org.)
+
+** Configuration
+The code from the previous section, that you pasted into your Emacs
+init script, loads a file called =rymcg.tech.el=. That file only
+exists because it's defined here in this file, and gets created
+whenever you tangle. Here's where it begins. 
+
+Edit the following snippet to link to the directory on your computer
+where you have this file (README.org) saved:
+
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
+;; DO NOT EDIT rymcg.tech.el directly. It is generated from README.org
+;; This is the directory that contains README.org:
+(setq rymcg/spellbook-root (expand-file-name "~/git/rymcg.tech"))
+;; Set the hugo root dir:
+(setq rymcg/spellbook-hugo-root (concat rymcg/spellbook-root "/hugo"))
+#+END_SRC
+
+Customize the path to your hugo binary, if it's not already on your PATH:
+
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
+;; Path to hugo binary:
+(setq rymcg/hugo-bin "hugo")
+#+END_SRC
 
 * Transmutation
 
 Each spellbook is a single Org file which can load other spellbooks.
-Each spellbook contains org-babel code blocks, and org-mode subtrees
-for ox-hugo to render to Markdown. When a spellbook references another
+Each spellbook contains org-babel code blocks, and sections marked for
+ox-hugo to render to Markdown. When a spellbook references another
 spell book, it can specify a named code block therein to evaluate,
 giving each spellbook the power to describe its own additional render
-process. This README.org file lists all the other spellbooks and
-starts off the build process for the entire site.
+process. 
 
-List all of the spellbooks: 
+Here is the list all of the spellbooks enabled for transmutation:
 
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
-(setq rymcg/spellbook-dir (expand-file-name "~/git/rymcg.tech"))
+;; List of all the spell books to transmute:
 (setq rymcg/spellbooks '(("blog.org")
                          ("license.org")))
 #+END_SRC
 
-/Transmutation/ describes the combined process of reading a spellbook,
-tangling its code blocks, and converting the ox-hugo posts from Org to
-markdown:
+/Transmutation/ describes the combined process of reading and parsing
+a spellbook, tangling its code blocks, converting the ox-hugo
+posts from Org to markdown, and building the HTML site with hugo:
 
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
 (defun rymcg/transmute-spellbook (path &optional eval-blocks no-tangle)
-  (let ((default-directory rymcg/spellbook-dir))
+  "Tangle a spellbook, export it to Markdown, and evaluate named code blocks"
+  (let ((default-directory rymcg/spellbook-root))
     (if (not (file-exists-p path))
       (error (concat "Spellbook does not exist: " path)))
     (save-window-excursion
@@ -206,10 +231,14 @@ markdown:
           (org-babel-execute-src-block-maybe))))))
 
 (defun rymcg/transmute-all ()
+  "Transmute all the spellbooks and build the hugo site"
   (interactive)
   (let ((func (lambda nil (dolist (spellbook-args rymcg/spellbooks)
                             (apply 'rymcg/transmute-spellbook spellbook-args))
-                (message "Done"))))
+                (let ((default-directory rymcg/spellbook-hugo-root))
+                  (unless (= 0 (call-process-shell-command rymcg/hugo-bin))
+                    (error "Hugo failed!")))
+                (message "Hugo site built"))))
     ;; Use sound if available:
     (if (fboundp 'audible-success)
         (audible-success (funcall func))
