@@ -1,0 +1,159 @@
+* Philips Hue Lighting
+I wonder if I can talk to my hue lights from Emacs? It's a standard
+REST service, so I'm guessing it's not hard.
+
+Enter the hostname (or IP address) of your philips hue bridge:
+#+BEGIN_SRC emacs-lisp
+(setq rymcg/hue-bridge-hostname "philips-hue.rymcg.tech")
+(setq rymcg/hue-bridge-username nil)
+#+END_SRC
+
+#+RESULTS:
+
+Very basic RESTful JSON client:
+
+#+BEGIN_SRC emacs-lisp :results none
+(defun rymcg/philips-hue-create-url (&optional path)
+  (concat "http://" rymcg/hue-bridge-hostname 
+          (if (not path)
+              (concat "/api/" rymcg/hue-bridge-username)
+            (if (equal "/" (substring path 0 1))
+                path
+              (concat "/api/" rymcg/hue-bridge-username "/" path)))))
+
+(defun rymcg/parse-http-response (response)
+  (car (cdr (split-string response "^$"))))
+(defun rymcg/parse-json-response (response)
+  (let ((json (json-read-from-string response)))
+    (let ((json (if (vectorp json) (aref json 0) json)))
+      (if (assoc 'error json)
+          (error (format "%s" json))
+        json))))
+
+(defun rymcg/philips-hue (&optional path)
+  (with-current-buffer
+      (url-retrieve-synchronously (rymcg/philips-hue-create-url path))
+    (rymcg/parse-json-response (rymcg/parse-http-response (buffer-string)))))
+#+END_SRC
+
+Press the link button on the bridge. Now log in and remember the
+credentials just for this session:
+
+#+BEGIN_SRC emacs-lisp :results none
+(let ((url-request-method "POST")
+      (url-request-data "{\"devicetype\":\"\"}"))
+  (setq rymcg/hue-bridge-username 
+        (cdr (assoc 'username ( assoc 'success (rymcg/philips-hue "/api"))))))
+#+END_SRC
+
+Get light statuses:
+
+#+BEGIN_SRC emacs-lisp :results table
+(rymcg/philips-hue "lights")
+#+END_SRC
+
+#+RESULTS:
+| 1 | (state (on . :json-false) (bri . 254) (hue . 39392) (sat . 13) (effect . none) (xy . [0.3691 0.3719]) (ct . 230) (alert . none) (colormode . xy) (reachable . t)) | (swupdate (state . noupdates) (lastinstall)) | (type . Extended color light) | (name . Hue color lamp 1)      | (modelid . LCT014) | (manufacturername . Philips) | (uniqueid . 00:17:88:01:02:cb:71:74-0b) | (swversion . 1.15.2_r19181) | (swconfigid . D5C374B3) | (productid . Philips-LCT014-2-A19ECLv4) |
+| 2 | (state (on . :json-false) (bri . 62) (hue . 5394) (sat . 254) (effect . none) (xy . [0.5816 0.3908]) (ct . 153) (alert . none) (colormode . hs) (reachable . t))  | (swupdate (state . noupdates) (lastinstall)) | (type . Extended color light) | (name . Hue color lamp 2)      | (modelid . LCT014) | (manufacturername . Philips) | (uniqueid . 00:17:88:01:02:c9:d4:35-0b) | (swversion . 1.15.2_r19181) | (swconfigid . D5C374B3) | (productid . Philips-LCT014-2-A19ECLv4) |
+| 3 | (state (on . :json-false) (bri . 254) (hue . 39392) (sat . 13) (effect . none) (xy . [0.3691 0.3719]) (ct . 230) (alert . none) (colormode . xy) (reachable . t)) | (swupdate (state . noupdates) (lastinstall)) | (type . Extended color light) | (name . Hue color lamp 3)      | (modelid . LCT014) | (manufacturername . Philips) | (uniqueid . 00:17:88:01:02:f7:c8:b1-0b) | (swversion . 1.15.2_r19181) | (swconfigid . D5C374B3) | (productid . Philips-LCT014-2-A19ECLv4) |
+| 4 | (state (on . :json-false) (bri . 254) (hue . 39392) (sat . 13) (effect . none) (xy . [0.3691 0.3719]) (ct . 230) (alert . none) (colormode . xy) (reachable . t)) | (swupdate (state . noupdates) (lastinstall)) | (type . Extended color light) | (name . Hue color lamp 4)      | (modelid . LCT014) | (manufacturername . Philips) | (uniqueid . 00:17:88:01:02:c9:f0:97-0b) | (swversion . 1.15.2_r19181) | (swconfigid . D5C374B3) | (productid . Philips-LCT014-2-A19ECLv4) |
+| 5 | (state (on . :json-false) (bri . 78) (hue . 9722) (sat . 175) (effect . none) (xy . [0.4583 0.4321]) (ct . 366) (alert . none) (colormode . hs) (reachable . t))  | (swupdate (state . noupdates) (lastinstall)) | (type . Extended color light) | (name . Hue lightstrip plus 1) | (modelid . LST002) | (manufacturername . Philips) | (uniqueid . 00:17:88:01:02:ad:6f:c8-0b) | (swversion . 5.90.0.19950)  |                         |                                         |
+
+Get state:
+
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+
+#+RESULTS:
+: (on . :json-false)
+
+
+Setting light state and toggling:
+
+#+BEGIN_SRC emacs-lisp :results none
+(defun rymcg/philips-hue-light (light &optional set-state)
+  (let* ((path (concat "lights/" (format "%s" light)))
+         (state (assoc 'state (rymcg/philips-hue path)))
+         (is-on (cdr (assoc 'on state)))
+         (toggle (if (equal is-on t) :json-false t))
+         (set-state (if (equal set-state :toggle) (list :on toggle) set-state)))
+    (if set-state
+        (let ((url-request-method "PUT")
+              (url-request-data (json-encode set-state)))
+          (rymcg/philips-hue (concat path "/state")))
+      state)))
+#+END_SRC
+
+Turn on:
+
+#+BEGIN_SRC emacs-lisp
+(rymcg/philips-hue-light 5 '(:on t))
+#+END_SRC
+
+#+RESULTS:
+| success | (/lights/5/state/on . t) |
+
+Turn off:
+
+#+BEGIN_SRC emacs-lisp
+(rymcg/philips-hue-light 5 '(:on :json-false))
+#+END_SRC
+
+#+RESULTS:
+| success | (/lights/5/state/on . :json-false) |
+
+Toggle on/off:
+
+#+BEGIN_SRC emacs-lisp
+(rymcg/philips-hue-light 5 :toggle)
+#+END_SRC
+
+#+RESULTS:
+| success | (/lights/5/state/on . :json-false) |
+
+Restore 'scene' the lame manual way:
+
+#+BEGIN_SRC emacs-lisp
+(defun rymcg/philips-hue-scene (light-states)
+  (dolist (scene light-states)
+    (let ((light (car scene))
+          (state (car (cdr scene))))
+      (rymcg/philips-hue-light light state))))
+
+(defun rymcg/office-scene-black nil
+  "Turn off all the office lights"
+    (rymcg/philips-hue-scene 
+     '((1 (:on :json-false))
+       (2 (:on :json-false))
+       (3 (:on :json-false))
+       (4 (:on :json-false))
+       (5 (:on :json-false)))))
+
+(defun rymcg/office-scene-black nil
+  "Turn off all the office lights"
+    (rymcg/philips-hue-scene 
+     '((1 (:on :json-false))
+       (2 (:on :json-false))
+       (3 (:on :json-false))
+       (4 (:on :json-false))
+       (5 (:on :json-false)))))
+#+END_SRC
+
+Get scenes stored on the bridge:
+
+#+BEGIN_SRC emacs-lisp
+(rymcg/philips-hue "scenes")
+#+END_SRC
+
+#+RESULTS:
+| oxSjNLir6ryXIkt | (name . Savanna sunset)    | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . :json-false) | (appdata (version . 1) (data . IgwGm_r01_d15)) | (picture . ) | (lastupdated . 2017-08-30T17:55:31) | (version . 2) |
+| hK19SxIup5QO7uT | (name . Bright)            | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . :json-false) | (appdata (version . 1) (data . AX5wa_r01_d05)) | (picture . ) | (lastupdated . 2017-08-30T17:55:33) | (version . 2) |
+| BIQx4vZkY57m1u8 | (name . Tropical twilight) | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . :json-false) | (appdata (version . 1) (data . LUuXv_r01_d16)) | (picture . ) | (lastupdated . 2017-08-30T17:55:31) | (version . 2) |
+| fN4rU2mXjsbo66Q | (name . Relax)             | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . t)           | (appdata (version . 1) (data . 27vwy_r01_d01)) | (picture . ) | (lastupdated . 2017-08-30T17:55:32) | (version . 2) |
+| VWqOwHXQt6z6a9D | (name . Read)              | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . t)           | (appdata (version . 1) (data . 1JEZs_r01_d02)) | (picture . ) | (lastupdated . 2017-08-30T17:55:33) | (version . 2) |
+| qY7QWipuFLYkGjc | (name . Dimmed)            | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . :json-false) | (appdata (version . 1) (data . npuXM_r01_d06)) | (picture . ) | (lastupdated . 2017-08-30T17:55:33) | (version . 2) |
+| 68xs8y-RzChNuly | (name . Energize)          | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . t)           | (appdata (version . 1) (data . FpHn9_r01_d04)) | (picture . ) | (lastupdated . 2017-08-30T17:55:33) | (version . 2) |
+| Z9jmvApz7x-KLeY | (name . Concentrate)       | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . t)           | (appdata (version . 1) (data . sjZrY_r01_d03)) | (picture . ) | (lastupdated . 2017-08-30T17:55:33) | (version . 2) |
+| xomryWbRhZLv2nv | (name . Arctic aurora)     | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . :json-false) | (appdata (version . 1) (data . 8HkKL_r01_d17)) | (picture . ) | (lastupdated . 2017-08-30T17:55:32) | (version . 2) |
+| SDpEZ6rspdOMqS2 | (name . Spring blossom)    | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . :json-false) | (appdata (version . 1) (data . IWozV_r01_d18)) | (picture . ) | (lastupdated . 2017-08-30T17:55:32) | (version . 2) |
+| hz27dw88jTInbMv | (name . Nightlight)        | (lights . [1 2 3 4 5]) | (owner . 6tO2ZuvYGsesCXkwyil9SaNJRn4tfQehQBUoFKap) | (recycle . :json-false) | (locked . :json-false) | (appdata (version . 1) (data . piiab_r01_d07)) | (picture . ) | (lastupdated . 2017-08-30T17:55:33) | (version . 2) |

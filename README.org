@@ -2,11 +2,11 @@
 #+HUGO_WEIGHT: auto
 #+OPTIONS: broken-links:mark
 
-* Spellbook
+* Spellbooks
 :PROPERTIES:
 :EXPORT_HUGO_SECTION: spellbook
 :END:
-** Make your website like this
+** Make your own website like this
 :PROPERTIES:
 :EXPORT_FILE_NAME: _index
 :END:
@@ -129,6 +129,12 @@ about something, and /thereby/ figure it out!
 :PROPERTIES:
 :EXPORT_HUGO_SECTION: spellbook/setup
 :END:
+*** Setup
+:PROPERTIES:
+:EXPORT_FILE_NAME: _index
+:END:
+All the configuration for your site should be done in the following sections.
+
 *** Dependencies
 :PROPERTIES:
 :EXPORT_FILE_NAME: dependencies
@@ -293,7 +299,8 @@ Here is the list all of the spellbooks enabled for transmutation:
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
 ;; List of all the spell books to transmute:
 (setq rymcg/spellbooks '(("README.org" ("hugo-import-theme"))
-                         ("license.org")))
+                         ("license.org")
+                         ("emacs.org")))
 #+END_SRC
 
 /Transmutation/ describes the combined process of reading and parsing
