@@ -2,10 +2,11 @@
 #+HUGO_WEIGHT: auto
 #+OPTIONS: broken-links:mark
 
-This is a spellbook of computational recipes. You can study it as you
+This is a spellbook of computational recipes. You can study it, as you
 would a regular book, but you can also recite magical incantations
 directly from its pages. This is /executable/ documentation, also
-called /literate programming/.
+called /literate programming/, and it all starts right here in this
+README file.
 
 Documentation is often an after thought, and suffers for it. Instead
 of figuring out how to do something and /then/ writing about it; write
@@ -13,66 +14,105 @@ about something, and /thereby/ figure it out!
 
 * Flow
 
-What forms does computer documentation take on? Let's think about it:
+What is your (work)flow for reading and writing documentation? Does it
+seem like /work/? Or do things just /flow/? Let's think about a few
+different mediums, and how they often present their documentation:
 
- - Software projects 
-   - A README file that mixes prose expository text with installation
-     procedures in the form of the commands to type, sometimes linking
-     to a seperate script file to run, or sometimes a code block to
-     cut and paste directly into the terminal.
- - Technical blog posts
+ - Small software projects:
+
+   - Minimally, a README file that mixes prose expository text with
+     installation procedures, in the form of the commands to type.
+
+    - Sometimes there is a link to a seperate script file to run, or
+      sometimes a code block to cut and paste directly into the
+      terminal.
+
+ - Big software projects
+
+   - Documnetation websites are nice and pretty, and are usually
+     searchable, but there is no integration with the terminal. You're
+     still stuck retyping commands (or copy and pasting) into your
+     shell.
+
+ - Technical blog posts:
+
    - A webpage that mixes prose text with commands to type/paste into
-     your terminal.
+     your terminal, or into config files (in files or directory trees
+     that might not exist yet.)
+
    - Often omits important steps the author didn't bother writing
-     about. (libraries to install, envrionment variables set, etc.)
+     about. (Libraries to install, envrionment variables set, etc.)
+
  - A PDF, or printed book
+
    - Text you /have to retype/, with syntactical mistranslations
      occuring at your own peril.
 
-Think about the author's process for any of the above. They are
-usually describing a process of something already precsribed (you
-usually only write a blog post /after/ you know what you want to say.)
-A blog post that describes a shell command to run, is one that the
-author (hopefully) tried out in their terminal beforehand, examined
-all the edge cases, and then pasted into their webpage for you to run.
-This is perfectly sensible, but there is another, more efficient, and
-reliable way.
+   - Sometimes difficult to tell if you're reading the latest version.
+
+Think about the author's process for writing any of the above. They
+are usually writing a process of something they've already figured
+out, and since they want to share it with you, they are now writing
+about it. Take for example, a blog post that describes a series of
+shell commands that the reader is expected to run. Usually, the writer
+figures out the proper commands in his shell, examines the edges
+cases, refiddles things a few times, then copies the final tested
+commands back into his document, with the reader expected to do the
+exact opposite. This is perfectly sensible, but there is another, more
+efficient, and reliable way.
 
 When you start a project, put the blog post process up at the front,
 /before/ you ever open your terminal, /before/ you even know anything
 about the thing you're potentially describing. Describe what you
-/want/ to do in plain English (or your native lingo.) At this stage
-every post is a /potential/ blog post that remains in draft. You
-should record every step of your discovery process through natural
-language and code blocks. An editor like Emacs/org-babel can actually
-/run/ your code blocks, you don't really even need a regular terminal
-at all. You can still try things out in your terminal first (I'm a big
-fan of [[https://github.com/kyagi/shell-pop-el][shell-pop]],) but always record each logical step in org-babel so
-that the steps are /reproducible/.
+/want/ to do in plain English (or your native lingo.) At this stage,
+every post is a /potential/ blog post. Write about every idea you
+have, even if you don't know if it will actually work out, and let the
+post linger in draft-status indefinitely. You should record every step
+of your discovery process through natural language and code blocks. An
+editor like Emacs, can actually /run/ code blocks directly for you
+(optionally recording STDOUT back into your document too,) so you
+don't really even need a regular terminal at all. You can still try
+things out in your terminal first if you want to, (I'm a big fan of
+[[https://github.com/kyagi/shell-pop-el][shell-pop]]) but always record each logical step /before/ moving on,
+with the aim of making the whole process /reproducible/.
 
-Later on, after this discovery process, you can edit the posts and
-polish them for publication. The magical twist to all this is that the
-final documentation becomes executable itself, simply by opening the
-file in Emacs org-mode, and running each code block with =C-c C-c=,
-and you execute the code again. Since the code is executed directly
-from within your documentation, it's also not possible for it to be
-out of date.
+Later on, after this discovery process concludes (yea right..), you
+can edit the posts, and polish them off for publication. The magical
+twist to all this, is that the final documentation becomes executable
+itself. Simply by opening the file in Emacs org-mode, and running each
+code block with =C-c C-c=, you execute the same code again. Since the
+code is executed directly from within your documentation, it's also
+not possible for the docs to be out of date.
 
-Open up Emacs in a fresh virtual machine, and you can quickly test
+If you open up Emacs in a fresh virtual machine, you can quickly test
 things from a potential reader's perspective, and to ensure everything
-still works in the clean environment. Plus, no (mis)typing things, and
+still works in a clean environment. Plus, no (mis)typing things, and
 no copy and pasting. It's better than a shell script too, because it's
 interactive. You get to see the output of each block, and react to it
-before executing the next block (just like you would in terminal.)
-Maybe it had a problem, and you have to tweak the code block and run
-it again a few times. If you get into this flowstate of writing and
+before executing the next block (just like you would typing in a
+terminal.) Maybe the command fails, and you have to tweak the code
+block, and run it again a few times before running the next code
+block, and so on. If you get into this flowstate, of writing and
 testing your code in logical blocks like this, /the documentation
 literally writes itself!/
 
-You have now manifested your will simply by describing it - A
-spellbook, for you to record your own technomancy, including chapters
-containing the exact processes of recreating all of your described
-technology, as well as how to recreate the book itself.
+As for your readers, they don't have to know anything about this, if
+you don't want them to. The HTML version looks just like any other web
+based documentation, and they can copy and paste things just like
+they're used to, or, if they're savy, they can download your provided
+Org source files, and then they can execute the commands from Emacs,
+just like you do! (You might think this would lead to your readers
+becoming lazy. If it's so easy to run, why even read it? Hopefully,
+providing a nice looking web version makes it more appealing to read,
+and if you get really familiar with a process, it's nice to have the
+/option/ for being lazy!)
+
+You have now manifested your will, simply by describing it. You also
+have acquired a copy of another mage's spellbook, with ample margins
+for your own notes and ammendments, and with many blank pages left,
+with which to record your own technomancy. It includes chapters to
+instantiate all of your described technologies, and the exact process
+of its own duplication.
 
 * Setup
 ** Dependencies
@@ -87,7 +127,7 @@ Put the following snippet someplace in your Emacs init scripts:
 
 #+NAME: example-emacs-init
 #+BEGIN_SRC emacs-lisp
-;; Load rymcg.tech.el which is tangled from main.org:
+;; Load rymcg.tech.el which is tangled from rymcg.tech/README.org
 (let ((rymcg/init (expand-file-name "~/.emacs.d/rymcg.tech.el")))
   (if (file-exists-p rymcg/init)
     (load-file rymcg/init)))
@@ -115,10 +155,10 @@ Each spellbook contains org-babel code blocks, and org-mode subtrees
 for ox-hugo to render to Markdown. When a spellbook references another
 spell book, it can specify a named code block therein to evaluate,
 giving each spellbook the power to describe its own additional render
-process. main.org lists all the other spellbooks and starts off the
-build process for the entire site.
+process. This README.org file lists all the other spellbooks and
+starts off the build process for the entire site.
 
-List all the spellbooks: 
+List all of the spellbooks: 
 
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
 (setq rymcg/spellbook-dir (expand-file-name "~/git/rymcg.tech"))
