@@ -243,12 +243,21 @@ Configure the hugo dev server:
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
 ;; hugo dev server:
 (setq rymcg/hugo-server-url "http://localhost:1313")
-(defun rymcg/hugo-server ()
-  "Start hugo server in an inferior shell"
+(defun rymcg/hugo-server (&optional kill)
+  "Start hugo server in an inferior shell.
+  if kill is non-nil, kill existing process without asking"
   (interactive)
   (let ((eshell-buffer-name (concat "*hugo-server-" rymcg/spellbook-hugo-root "*")))
+    ;; Kill the old buffer if we're allowed to:
     (if (bufferp (get-buffer eshell-buffer-name))
-        (kill-buffer eshell-buffer-name))
+        (save-window-excursion 
+          (if (and kill (get-buffer-process eshell-buffer-name))
+              ;; Kill buffer without asking about running process:
+              (let ((kill-buffer-query-functions nil))
+                (kill-buffer eshell-buffer-name))
+            ;; Prompt first if there's a running process:
+            (kill-buffer eshell-buffer-name))))
+    ;; Start a new server:
     (eshell)
     (eshell-return-to-prompt)
     (insert (concat "cd " rymcg/spellbook-hugo-root))
@@ -319,11 +328,16 @@ posts from Org to markdown, and building the HTML site with hugo:
                 (let ((default-directory rymcg/spellbook-hugo-root))
                   (unless (= 0 (call-process-shell-command rymcg/hugo-bin))
                     (error "Hugo failed!")))
+                ;; Forcefully restart the hugo server, as it quite
+                ;; invariably dies anyway shortly after tangle:
+                (rymcg/hugo-server 1)
                 (message "Hugo site built"))))
     ;; Use sound if available:
     (if (fboundp 'audible-success)
         (audible-success (funcall func))
       (funcall func))))
+;; Bind to useful mnemonic:
+(global-set-key (kbd "C-c <f5>") 'rymcg/transmute-all)
 #+END_SRC
 
 You can now build the site with =M-x rymcg/transmute-all=.
