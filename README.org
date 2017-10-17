@@ -306,9 +306,10 @@ posts from Org to markdown, and building the HTML site with hugo:
       (org-hugo-export-subtree-to-md 1)
       ;; Eval specified code blocks
       (dolist (codeblock eval-blocks)
-        (org-babel-goto-named-src-block codeblock)
-        (let ((org-confirm-babel-evaluate nil))
-          (org-babel-execute-src-block-maybe))))))
+        (save-excursion 
+          (org-babel-goto-named-src-block codeblock)
+          (let ((org-confirm-babel-evaluate nil))
+            (org-babel-execute-src-block-maybe)))))))
 
 (defun rymcg/transmute-all ()
   "Transmute all the spellbooks and build the hugo site"
