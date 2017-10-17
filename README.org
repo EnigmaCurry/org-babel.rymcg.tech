@@ -133,8 +133,18 @@ These dependencies are automatically set up below:
 
  - [[https://ox-hugo.scripter.co/][ox-hugo]] - Converts our Org sources to Hugo consumable Markdown.
 
+** Install
+You should [[https://github.com/EnigmaCurry/rymcg.tech/fork][fork this repository on github]], then clone it to your
+computer. This example just clones my version directly:
+
+#+BEGIN_EXAMPLE
+mkdir -p ~/git
+cd ~/git
+git clone https://github.com/EnigmaCurry/rymcg.tech.git
+#+END_EXAMPLE
+
 ** Bootstrap
-Put the following snippet someplace in your Emacs init scripts: 
+Copy the following snippet someplace in your Emacs init scripts: 
 
 #+NAME: example-emacs-init
 #+BEGIN_SRC emacs-lisp
@@ -146,13 +156,13 @@ Put the following snippet someplace in your Emacs init scripts:
 
 The above snippet is the only manual bootstrapping you'll need to copy
 and paste, all the rest of the code blocks stay in this file (or one
-of the linked files in this repository) and are exported via
-org-babel. With this file open in Emacs, press =C-c C-v t=
+of the linked files in this repository.) and are exported via
+org-babel. With README.org open in Emacs, press =C-c C-v t=
 (org-babel-tangle) which will automatically create the file
 =~/.emacs.d/rymcg.tech.el= (this file creation process is called
 /tangling/, in org-babel parlance). After tangling, restart Emacs to
-load the configuration, or just eval the following if you don't want
-to restart:
+load the configuration, or just eval the following code if you don't
+want to restart:
 
 #+BEGIN_SRC emacs-lisp
 (load-library (expand-file-name "~/.emacs.d/rymcg.tech.el"))
@@ -169,8 +179,8 @@ README.org.)
 ** Configuration
 The code from the previous section, that you pasted into your Emacs
 init script, loads a file called =rymcg.tech.el=. That file only
-exists because it's defined here in this file, and gets created
-whenever you tangle. Here's where it begins. 
+exists because it's defined here in this file, and gets (re)created
+whenever you tangle.
 
 Edit the following snippet to link to the directory on your computer
 where you have this file (README.org) saved:
@@ -179,15 +189,41 @@ where you have this file (README.org) saved:
 ;; DO NOT EDIT rymcg.tech.el directly. It is generated from README.org
 ;; This is the directory that contains README.org:
 (setq rymcg/spellbook-root (expand-file-name "~/git/rymcg.tech"))
-;; Set the hugo root dir:
+#+END_SRC
+
+The spellbook-root directory contains all of your Org source files.
+Beneath that directory, we create a directory for hugo, which will
+contain the compiled Markdown sources:
+
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
+;; Set the hugo root beneath the spellbook root:
 (setq rymcg/spellbook-hugo-root (concat rymcg/spellbook-root "/hugo"))
 #+END_SRC
+
+The only thing in the spellbook-hugo-root directory that need to care
+about saving is the =hugo/static= directory. Everything else can be
+regenerated from Org file source. (Look at the .gitignore file, which
+is setup to ignore commiting anything in this directory except for
+static images.)
 
 Customize the path to your hugo binary, if it's not already on your PATH:
 
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
 ;; Path to hugo binary:
 (setq rymcg/hugo-bin "hugo")
+#+END_SRC
+
+This is the host and port the Hugo dev server runs on:
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
+(setq rymcg/hugo-server-url "http://localhost:1313")
+#+END_SRC
+
+Use-package will automatically download ox-hugo from MELPA:
+
+#+BEGIN_SRC emacs-lisp :mkdirp yes :tangle ~/.emacs.d/rymcg.tech.el
+(use-package ox-hugo
+  :ensure t
+  :after ox)
 #+END_SRC
 
 * Transmutation
@@ -203,7 +239,7 @@ Here is the list all of the spellbooks enabled for transmutation:
 
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/rymcg.tech.el :results none
 ;; List of all the spell books to transmute:
-(setq rymcg/spellbooks '(("blog.org")
+(setq rymcg/spellbooks '(("main.org" ("hugo-import-theme"))
                          ("license.org")))
 #+END_SRC
 
@@ -246,6 +282,509 @@ posts from Org to markdown, and building the HTML site with hugo:
 #+END_SRC
 
 You can now build the site with =M-x rymcg/transmute-all=.
+
+* Hugo Template
+
+This section tangles the hugo configuration, templates, styles, and themes:
+
+** Hugo config file
+Here's the main hugo config file:
+
+#+BEGIN_SRC yml :tangle ./hugo/config.yml :eval no :mkdirp yes
+baseURL: "https://blog.rymcg.tech/"
+languageCode: "en-us"
+DefaultContentLanguage: "en"
+
+title: "rymcg.tech"
+theme: "docdock"
+
+pygmentsCodeFences: true
+pygmentsUseClasses: true
+showhidden: false
+
+params:
+  noHomeIcon: true
+  noSearch: false
+  showVisitedLinks: true
+  ordersectionsby: "weight"
+  themeVariant: "rymcg"
+  
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+mediaTypes:
+  "text/plain":
+    suffix: "org"
+#+END_SRC
+
+** Hugo template
+
+Create the site header:
+
+#+BEGIN_SRC markdown :mkdirp yes :eval no :tangle ./hugo/content/_header.md
+rymcg.tech
+#+END_SRC
+
+Import the theme:
+
+#+NAME: hugo-import-theme
+#+BEGIN_SRC shell :dir ./hugo :results none
+if [ ! -d themes/docdock ]; then
+    mkdir -p themes
+    git submodule add -f https://github.com/EnigmaCurry/hugo-theme-docdock themes/docdock
+fi
+#+END_SRC
+
+Customize the header for each page, include any [[https://gohugo.io/variables/page/][Hugo Page Variables]]:
+
+#+BEGIN_SRC html :mkdirp yes :tangle ./hugo/layouts/partials/custom-post-header.html
+<div id="post-meta">
+{{if $.Param "draft"}}
+   <div class="notices info">This page is an unpublished draft.</div>
+{{end}}
+   {{if $.Param "author"}} 
+  Author: {{ $.Param "author"}}<br/>
+{{end}}
+{{if not .Date.IsZero}}
+  Published: {{.Date.Format "January 1, 2006"}}
+  {{if ne .Lastmod .Date}}(<b>last update: {{.Lastmod.Format "January 1, 2006"}}</b>){{end}}<br/>
+{{end}}
+</div>
+#+END_SRC
+
+** CSS 
+
+Create our own theme variant:
+
+#+BEGIN_SRC css :mkdirp yes :eval no :tangle ./hugo/static/css/theme-rymcg.css
+:root{
+    --MAIN-BACK-color:#ddd;
+    --MAIN-TXT-color: #000;
+    --MAIN-LINK-color:#3995b1;
+    --MAIN-HOVER-color:#c51212;
+    --SIDE-MAIN-color:#444;
+    --SIDE-MAIN-TXT-color:#fff;
+    --SIDE-FOCUS-BACK-color:#707070;
+    --SIDE-FOCUS-FORE-color:black;
+    --MENU-LINK-color:#fff;
+    --MENU-ACTIVE-BACK-color:#505050;
+    --MENU-ACTIVE-LINK-color:white;
+    --NAV-HOVER-color:#bbb;
+}
+#header-wrapper {
+    border-bottom: none;
+}
+#sidebar ul li.visited > a .read-icon {
+	color: var(--SIDE-MAIN-color);
+}
+a {
+    color: var(--MAIN-LINK-color);
+}
+a:hover {
+    color: var(--MAIN-HOVER-color);
+}
+body {
+    background-color: var(--MAIN-BACK-color);
+    color: var(--MAIN-TXT-color) !important;
+}
+#body a.highlight:after {
+    background-color: var(--MAIN-HOVER-color);
+}
+#sidebar {
+	background-color: var(--SIDE-MAIN-color);
+}
+#sidebar #header-wrapper {
+    background: var(--SIDE-MAIN-color);
+    color: var(--BF-color)
+    border-color: var(--SIDE-FOCUS-BACK-color);
+}
+#sidebar .searchbox {
+	border-color: var(--BF-color);
+    background: var(--SIDE-FOCUS-BACK-color);
+}
+#sidebar ul.topics > li.parent, #sidebar ul.topics > li.active {
+    background: var(--SIDE-FOCUS-BACK-color);
+}
+#sidebar .searchbox * {
+    color: var(--SIDE-FOCUS-FORE-color);
+}
+#sidebar a , #sidebar a:hover {
+    color: var(--MENU-LINK-color);
+}
+#sidebar .parent li, #sidebar .active li {
+    border-color: var(--MENU-ACTIVE-LINK-color);
+}
+#sidebar ul li.active > a {
+    background: var(--MENU-ACTIVE-BACK-color);
+    color: var(--MENU-ACTIVE-LINK-color) !important;
+}
+#sidebar ul li .category-icon {
+	color: var(--MENU-LINK-color);
+}
+#sidebar #shortcuts h3 {
+    color: var(--SIDE-MAIN-TXT-color);
+}
+
+.footline {
+	border-color: var(--SIDE-FOCUS-BACK-color);
+}
+
+div.block-header {
+    color: #fff;
+    padding-left: 1em;
+    font-family: monospace;
+    font-weight: bold;
+    border-radius: 8px 8px 0 0;
+}
+div.block-header {
+    background-color: #4d4b54;
+}
+div.block-header.tangle {
+    background-color: #4e3a82;    
+}
+div.block-header.exec {
+    background-color: #b93838;    
+}
+.copy-to-clipboard {
+    margin-top: -1px;
+}
+pre {
+    border-radius: 0 0 8px 8px;
+}
+pre .copy-to-clipboard {
+    background-color: #fff;
+    border: 1px solid #272a2c !important;
+}
+pre .copy-to-clipboard:hover {
+    background-color: #ffa;
+}
+
+div#tags {
+    float: none;
+}
+div#breadcrumbs {
+    width: calc(100% - 20px);
+}
+div#body-inner {
+    max-width: 100ch;
+}
+div#body-inner h1 {
+    margin-bottom: 0;
+}
+div#post-meta {
+    font-size: 0.7em;
+    font-family: sans-serif;
+    margin-bottom: 3em;
+}
+div#body-inner pre {
+    margin-top: 0;
+}
+
+#body .nav:hover {
+    background-color: var(--NAV-HOVER-color);
+}
+#+END_SRC
+
+Most syntax highlighting is done with Chroma, which is builtin to
+hugo. The site uses the =perldoc= theme:
+
+#+BEGIN_SRC css :tangle ./hugo/static/css/theme-rymcg.css
+/* perldoc syntax highlight style */
+/* Background */ .chroma { background-color: #eeeedd }
+/* Error */ .chroma .err { color: #a61717; background-color: #e3d2d2 }
+/* LineHighlight */ .chroma .hl { background-color: #ffffcc; display: block; width: 100% }
+/* LineNumbers */ .chroma .ln { ; margin-right: 0.4em; padding: 0 0.4em 0 0.4em; }
+/* Keyword */ .chroma .k { color: #8b008b; font-weight: bold }
+/* KeywordConstant */ .chroma .kc { color: #8b008b; font-weight: bold }
+/* KeywordDeclaration */ .chroma .kd { color: #8b008b; font-weight: bold }
+/* KeywordNamespace */ .chroma .kn { color: #8b008b; font-weight: bold }
+/* KeywordPseudo */ .chroma .kp { color: #8b008b; font-weight: bold }
+/* KeywordReserved */ .chroma .kr { color: #8b008b; font-weight: bold }
+/* KeywordType */ .chroma .kt { color: #00688b; font-weight: bold }
+/* NameAttribute */ .chroma .na { color: #658b00 }
+/* NameBuiltin */ .chroma .nb { color: #658b00 }
+/* NameClass */ .chroma .nc { color: #008b45; font-weight: bold }
+/* NameConstant */ .chroma .no { color: #00688b }
+/* NameDecorator */ .chroma .nd { color: #707a7c }
+/* NameException */ .chroma .ne { color: #008b45; font-weight: bold }
+/* NameFunction */ .chroma .nf { color: #008b45 }
+/* NameNamespace */ .chroma .nn { color: #008b45 }
+/* NameTag */ .chroma .nt { color: #8b008b; font-weight: bold }
+/* NameVariable */ .chroma .nv { color: #00688b }
+/* LiteralString */ .chroma .s { color: #cd5555 }
+/* LiteralStringAffix */ .chroma .sa { color: #cd5555 }
+/* LiteralStringBacktick */ .chroma .sb { color: #cd5555 }
+/* LiteralStringChar */ .chroma .sc { color: #cd5555 }
+/* LiteralStringDelimiter */ .chroma .dl { color: #cd5555 }
+/* LiteralStringDoc */ .chroma .sd { color: #cd5555 }
+/* LiteralStringDouble */ .chroma .s2 { color: #cd5555 }
+/* LiteralStringEscape */ .chroma .se { color: #cd5555 }
+/* LiteralStringHeredoc */ .chroma .sh { color: #1c7e71; font-style: italic }
+/* LiteralStringInterpol */ .chroma .si { color: #cd5555 }
+/* LiteralStringOther */ .chroma .sx { color: #cb6c20 }
+/* LiteralStringRegex */ .chroma .sr { color: #1c7e71 }
+/* LiteralStringSingle */ .chroma .s1 { color: #cd5555 }
+/* LiteralStringSymbol */ .chroma .ss { color: #cd5555 }
+/* LiteralNumber */ .chroma .m { color: #b452cd }
+/* LiteralNumberBin */ .chroma .mb { color: #b452cd }
+/* LiteralNumberFloat */ .chroma .mf { color: #b452cd }
+/* LiteralNumberHex */ .chroma .mh { color: #b452cd }
+/* LiteralNumberInteger */ .chroma .mi { color: #b452cd }
+/* LiteralNumberIntegerLong */ .chroma .il { color: #b452cd }
+/* LiteralNumberOct */ .chroma .mo { color: #b452cd }
+/* OperatorWord */ .chroma .ow { color: #8b008b }
+/* Comment */ .chroma .c { color: #228b22 }
+/* CommentHashbang */ .chroma .ch { color: #228b22 }
+/* CommentMultiline */ .chroma .cm { color: #228b22 }
+/* CommentSingle */ .chroma .c1 { color: #228b22 }
+/* CommentSpecial */ .chroma .cs { color: #8b008b; font-weight: bold }
+/* CommentPreproc */ .chroma .cp { color: #1e889b }
+/* CommentPreprocFile */ .chroma .cpf { color: #1e889b }
+/* GenericDeleted */ .chroma .gd { color: #aa0000 }
+/* GenericEmph */ .chroma .ge { font-style: italic }
+/* GenericError */ .chroma .gr { color: #aa0000 }
+/* GenericHeading */ .chroma .gh { color: #000080; font-weight: bold }
+/* GenericInserted */ .chroma .gi { color: #00aa00 }
+/* GenericOutput */ .chroma .go { color: #888888 }
+/* GenericPrompt */ .chroma .gp { color: #555555 }
+/* GenericStrong */ .chroma .gs { font-weight: bold }
+/* GenericSubheading */ .chroma .gu { color: #800080; font-weight: bold }
+/* GenericTraceback */ .chroma .gt { color: #aa0000 }
+/* TextWhitespace */ .chroma .w { color: #bbbbbb }
+#+END_SRC
+
+As a fallback, highlight.js is used for blocks that chroma can't
+handle. Here's a slight mod of the =purebasic= theme:
+
+#+BEGIN_SRC css :tangle ./hugo/static/css/hybrid.css
+.hljs {
+	background: #eeeedd !important;
+	display: block;
+	overflow-x: auto;
+	padding: 0.5em;
+}
+.hljs,.hljs-type,.hljs-function,.hljs-name,.hljs-number,.hljs-attr,.hljs-params,.hljs-subst {
+	color: #000000;
+}
+.hljs-comment,.hljs-regexp,.hljs-section,.hljs-selector-pseudo,.hljs-addition {
+	color: #00AAAA;
+}
+.hljs-title,.hljs-tag,.hljs-variable,.hljs-code {
+	color: #006666;
+}
+.hljs-keyword,.hljs-class,.hljs-meta-keyword,.hljs-selector-class,.hljs-built_in,.hljs-builtin-name {
+	color: #006666;
+	font-weight: bold;
+}
+.hljs-string,.hljs-selector-attr {
+	color: #0080FF;
+}
+.hljs-symbol,.hljs-link,.hljs-deletion,.hljs-attribute {
+	color: #924B72;
+}
+.hljs-meta,.hljs-literal,.hljs-selector-id {
+	color: #924B72;
+	font-weight: bold;
+}
+.hljs-strong,.hljs-name {
+	font-weight: bold;
+}
+.hljs-emphasis {
+	font-style: italic;
+}
+#+END_SRC
+
+** Code block headers
+When reading code blocks in Org file source it's pretty easy to see
+what file it's referring to, by looking at the =:tangle= parameter:
+
+#+BEGIN_EXAMPLE org
+#+BEGIN_SRC emacs-lisp :tangle /some/path/example.el
+  (messsage "example")
+#+END_SRC
+#+END_EXAMPLE
+
+But when this is exported to HTML, you don't get to see the =:tangle=
+part, which means either the reader has to infer it from the context,
+or you need to add extra text to the document. The first form is
+confusing to the user reading in his web browser. The latter form
+means you're repeating yourself, and when you refactor path names, you
+will have an additional thing you need to edit, or else an opportunity
+arises for the documentation to diverge from the code. Messy.
+ 
+Let's automatically add headers to all the code blocks exported to
+HTML.
+
+ - Tangled code should have header with =Create in $FILE=
+ - Shell code blocks should have header with =Run in $DIR= 
+ - Example blocks should have header with =Example= 
+
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.rymcg.tech.el
+;; original credit to John Kitchin - https://stackoverflow.com/a/38876439/56560
+(defun rymcg/org-hugo-export-block-headers (backend)
+  (let ((src-blocks (org-element-map (org-element-parse-buffer) 'src-block #'identity)))
+    (setq src-blocks (nreverse src-blocks))
+    (loop for src in src-blocks
+          do
+          (goto-char (org-element-property :begin src))
+          (let ((tangle (cdr (assoc :tangle (nth 2 (org-babel-get-src-block-info)))))
+                (directory (cdr (assoc :dir (nth 2 (org-babel-get-src-block-info)))))
+                (language-name (first (org-babel-get-src-block-info)))
+                (block-name (nth 4 (org-babel-get-src-block-info))))
+            (let ((shell-block? (equal language-name "shell"))
+                  (tangle-block? (not (equal tangle "no"))))
+              (let ((block-name-fmt (if block-name (format "%s<br/>" block-name) ""))
+                    (html-class (cond (tangle-block? "block-header tangle")
+                                      (shell-block? "block-header exec")
+                                      ("block-header")))
+                    (header-txt (cond (tangle-block? (format "Create in %s" tangle))
+                                      (shell-block? 
+                                       (concat "Run" (if directory 
+                                                         (format " in %s" directory) "")))
+                                      ((not block-name) "&nbsp;")
+                                      (""))))
+                (insert (format "\n#+HTML: <div class='%s'>%s%s</div>\n" html-class 
+                                block-name-fmt header-txt)))))))
+
+  (let ((ex-blocks (org-element-map (org-element-parse-buffer) 'example-block #'identity)))
+    (setq ex-blocks (nreverse ex-blocks))
+    (loop for ex in ex-blocks
+          do
+          (goto-char (org-element-property :begin ex))
+          (insert (format "\n#+HTML: <div class='block-header example'>Example</div>\n")))))
+
+(defadvice org-hugo-export-subtree-to-md (around org-hugo-export-advice)
+  (let ((org-export-before-processing-hook '(rymcg/org-hugo-export-block-headers)))
+    ad-do-it))
+(ad-activate 'org-hugo-export-subtree-to-md)
+#+END_SRC
+
+#+RESULTS:
+: org-hugo-export-subtree-to-md
+
+** RSS
+Hugo ships with it's own [[https://gohugo.io/templates/rss/#the-embedded-rss-xml][RSS template]], but let's create our own:
+
+ - Only include the 30 most recent entries.
+ - Display in reverse chronological order.
+ - Include any pages that have a date, /including =_index= pages/.
+  - The date must be set in the front matter params, by ox-hugo.
+
+#+BEGIN_SRC xml :mkdirp yes :tangle ./hugo/layouts/rss.xml
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ .Site.Title }}</title>
+    <link>{{ .Permalink }}</link>
+    <description>Recent content on {{ .Site.Title }}</description>
+    <generator>Hugo -- gohugo.io</generator> {{ with .Site.LanguageCode }}
+    <language>{{.}}</language> {{end}} {{ with .Site.Copyright }}
+    <copyright>{{.}}</copyright> {{end}} {{ if not .Date.IsZero }}
+    <lastBuildDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>{{ end }}
+    {{ range first 30 (where .Site.AllPages.ByDate.Reverse "Params.date" "!=" nil) }} <item>
+        <title>{{ .Title }}</title>
+        <link>{{ .Permalink }}</link>
+        <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate> {{ with .Site.Author.email }}
+        <author>{{.}}{{ with $.Site.Author.name }} ({{.}}){{end}}</author>{{end}}
+        <guid>{{ .Permalink }}</guid>
+        <description>{{ .Summary | html }}</description>
+      </item>{{ end }}
+  </channel>
+</rss>
+ #+END_SRC
+
+Add a link to the RSS in the page head:
+
+#+BEGIN_SRC html :tangle ./hugo/layouts/partials/custom-head.html
+{{ if .RSSLink }}
+  <link href="{{ .RSSLink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
+{{ end }}
+#+END_SRC
+
+* Creating content
+  :PROPERTIES:
+  :EXPORT_FILE_NAME: creating-content
+  :END:
+** Linking to static files
+
+Put your images in =./hugo/static/images=
+
+Test: [[/images/lolwut.png]]
+
+{{% notice info %}}
+Each static directory needs to be whitelisted in =.gitignore= (already done for images subdir.)
+{{% /notice %}}
+
+* Half baked ideas
+** Export the output of code blocks and timestamp of last run
+
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/blog.rymcg.tech.el
+(defadvice org-babel-insert-result (after org-babel-record-result-timestamp)
+  (let ((code-block-params (nth 2 (org-babel-get-src-block-info)))
+        (block-name (nth 4 (org-babel-get-src-block-info))))
+    (let ((timestamp (cdr (assoc :timestamp code-block-params)))
+          (result-params (assoc :result-params code-block-params)))
+      (if (and (equal timestamp "t") 
+               (> (length block-name) 0)
+               (member "html" result-params))
+          (save-excursion
+            (goto-char (point-min))
+            (search-forward-regexp (concat "^\w*#\\+RESULTS: " 
+                                           block-name 
+                                           "\n\w*#\\+BEGIN_EXPORT html\n"))
+            (let ((beg (point)))
+              (search-forward-regexp "^\w*#\\+END_EXPORT")
+              (beginning-of-line)
+              (kill-region beg (point)))
+            (insert (format (concat "<div class=\"block-header results\">"
+                                    block-name
+                                    " - Last run: %s</div>\n")
+                            (format-time-string "%F %r")))
+            (insert (format (concat "<div class=\"block-results\" "
+                                    "id=\"results-%s\"><pre class=\"chroma\">\n") 
+                            block-name))
+            (yank)
+            (insert "</pre></div>\n"))
+        (if (equal timestamp "t")
+            (message (concat "Result timestamping requires a #+NAME: "
+                             "and a ':results html' argument.")))))))
+(ad-activate 'org-babel-insert-result)
+#+END_SRC
+
+Output requires the code block to have all these parameters:
+
+ - =#+NAME:=
+   - A unique name for the code block ensures that the correct result
+     block will be updated.
+ - =:timestamp t=
+  - Turns on the timestamp
+ - =:exports both= 
+  - Exports both the code block itself, and it's output, to HTML.
+ - =:results html= 
+  - Formats the result as HTML.
+ - =:eval never-export= 
+  - (Optional) Makes it so the block is *not* automatically evaluated
+    on export. It has to be manually run.
+
+#+NAME: testguy
+#+BEGIN_SRC shell :results html :exports both :eval never-export :timestamp t
+whoami
+ls
+#+END_SRC
+
+Results and timestamp are exported to HTML each time the block is re-evaluated:
+
+#+RESULTS: testguy
+#+BEGIN_EXPORT html
+<div class="block-header results">testguy - Last run: 2017-10-03 06:38:02 PM</div>
+<div class="block-results" id="results-testguy"><pre class="chroma">
+ryan
+blog
+blog.org
+</pre></div>
+#+END_EXPORT
 
 * COMMENT Local Variables                    :ARCHIVE:
 This section sets up our Emacs on-save hooks. When you open this file
