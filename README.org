@@ -116,11 +116,22 @@ of its own duplication.
 
 * Setup
 ** Dependencies
-My configuration consists of:
+Get familiar with the following, and install yourself:
 
- - [[https://www.gnu.org/software/emacs/][Emacs]] 25
- - [[https://www.gnu.org/software/emacs/][Org Mode]] 9 from the [[http://orgmode.org/elpa.html][project repos]]
+ - [[https://www.gnu.org/software/emacs/][Emacs]] 25+
+  - The extensible editor, everything runs inside it.
+ - [[https://github.com/jwiegley/use-package][use-package]] (can install from [[https://melpa.org/#/use-package][melpa]])
+  - Declarative Emacs packaging.
+ - [[https://www.gnu.org/software/emacs/][Org Mode]] 9+ from the [[http://orgmode.org/elpa.html][project repos]]
+  - Does a lot of stuff, but for our purposes it is used for
+    hierarchical note taking, and for [[http://org-babel.readthedocs.io/en/latest/][org-babel]] code blocks.
  - [[https://gohugo.io/][Hugo]] 0.30+
+  - Builds a complete static website from Markdown content. We convert
+    Org source files to Markdown, before running this guy.
+
+These dependencies are automatically set up below:
+
+ - [[https://ox-hugo.scripter.co/][ox-hugo]] - Converts our Org sources to Hugo consumable Markdown.
 
 ** Bootstrap
 Put the following snippet someplace in your Emacs init scripts: 
@@ -133,20 +144,26 @@ Put the following snippet someplace in your Emacs init scripts:
     (load-file rymcg/init)))
 #+END_SRC
 
-The above snippet is the only manual bootstrapping you'll need, all
-the rest of the code blocks are handled via org-babel. In Emacs, press
-=C-c C-v t= (org-babel-tangle) which will automatically create
-=~/.emacs.d/rymcg.tech.el= which will contain the rest of the setup.
-Restart Emacs to load the configuration, or just eval the following if
-you don't want to restart:
+The above snippet is the only manual bootstrapping you'll need to copy
+and paste, all the rest of the code blocks stay in this file (or one
+of the linked files in this repository) and are exported via
+org-babel. With this file open in Emacs, press =C-c C-v t=
+(org-babel-tangle) which will automatically create
+=~/.emacs.d/rymcg.tech.el= which will loads the rest of the setup
+described here. Now restart Emacs to load the configuration, or just
+eval the following if you don't want to restart:
 
 #+BEGIN_SRC emacs-lisp
 (load-library (expand-file-name "~/.emacs.d/rymcg.tech.el"))
 #+END_SRC
 
-You need to re-tangle anytime you make changes to this file, but there
-is an on-save hook to do this automatically (take a look in the Local
-Variables section below.)
+You can put your cursor anywhere inside the above code block, and
+press =C-c C-c= to evaluate its contents, but this will only affect
+your current Emacs session, and won't be permanent until you retangle.
+You manually retangle anytime by pressing =C-c C-v t=, but this can
+also happen automatically whenever you save this file. (See the notes
+on enabling this in the [[Local Variables]] section at the bottom of
+README.org.)
 
 * Transmutation
 
