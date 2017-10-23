@@ -132,9 +132,8 @@ about something, and /thereby/ figure it out!
 *** Setup
 :PROPERTIES:
 :EXPORT_FILE_NAME: _index
+:EXPORT_HUGO_WEIGHT: 2002
 :END:
-All the configuration for your site should be done in the following sections.
-
 *** Dependencies
 :PROPERTIES:
 :EXPORT_FILE_NAME: dependencies
@@ -358,6 +357,11 @@ You can now build the site with =M-x rymcg/transmute-all=.
 :PROPERTIES:
 :EXPORT_HUGO_SECTION: spellbook/hugo
 :END:
+*** Hugo
+:PROPERTIES:
+:EXPORT_FILE_NAME: _index
+:EXPORT_HUGO_WEIGHT: 2004
+:END:
 *** Hugo config file
 :PROPERTIES:
 :EXPORT_FILE_NAME: config
@@ -397,7 +401,7 @@ mediaTypes:
 
 *** Hugo templates
 :PROPERTIES:
-:EXPORT_FILE_NAME: templates
+:EXPORT_FILE_NAME: hugo/templates
 :END:
 
  Create the site header:
@@ -433,6 +437,29 @@ fi
 </div>
  #+END_SRC
 
+I do not like the post excerpts on my index pages, rather I just want
+post titles as links to the posts themselves. This is a simplified
+[[https://gohugo.io/templates/views/][hugo list view]]:
+
+#+BEGIN_SRC html :mkdirp yes :tangle ./hugo/layouts/_default/li.html
+<h2 class="post-title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+#+END_SRC
+
+Create a pagination template that, when there is only one page, does
+no output:
+#+BEGIN_SRC html :mkdirp yes :tangle ./hugo/layouts/partials/pagination.html
+<nav class="pagination" role="navigation">
+     {{if gt .TotalPages 1}}
+	{{if .HasPrev}}
+	    <a class="newer-posts" href="{{ .Prev.URL }}">&larr; {{T "Previous-Pages"}}</a>
+	{{end}}
+        <span class="page-number">{{T "Page"}} {{ .PageNumber }} {{T "pagination-on"}} {{.TotalPages}}</span>
+	{{if .HasNext}}
+	    <a class="older-posts" href="{{ .Next.URL }}">{{T "Next-Pages"}} &rarr;</a>
+	{{end}}
+     {{end}}
+</nav>
+#+END_SRC
 *** CSS 
 :PROPERTIES:
 :EXPORT_FILE_NAME: css
@@ -803,24 +830,24 @@ grep -R -E "^weight =" hugo/content | awk -v OFS="  " -F" " '{print $3, $1}' | s
 | 1001 | hugo/content/license/_index.md:weight                    |
 | 2001 | hugo/content/spellbook/_index.md:weight                  |
 | 2002 | hugo/content/spellbook/flow.md:weight                    |
+| 2002 | hugo/content/spellbook/setup/_index.md:weight            |
 | 2003 | hugo/content/spellbook/transmutation.md:weight           |
-| 2004 | hugo/content/spellbook/creating-content.md:weight        |
-| 2004 | hugo/content/spellbook/hugo.md:weight                    |
-| 3001 | hugo/content/spellbook/hugo/config.md:weight             |
-| 3001 | hugo/content/spellbook/setup/_index.md:weight            |
-| 3002 | hugo/content/spellbook/hugo/template.md:weight           |
-| 3002 | hugo/content/spellbook/hugo/templates.md:weight          |
+| 2004 | hugo/content/spellbook/hugo/_index.md:weight             |
+| 2005 | hugo/content/spellbook/creating-content.md:weight        |
+| 3002 | hugo/content/spellbook/hugo/config.md:weight             |
 | 3002 | hugo/content/spellbook/setup/dependencies.md:weight      |
-| 3003 | hugo/content/spellbook/hugo/css.md:weight                |
+| 3003 | hugo/content/spellbook/hugo/templates.md:weight          |
 | 3003 | hugo/content/spellbook/setup/install.md:weight           |
-| 3004 | hugo/content/spellbook/hugo/code-block-headers.md:weight |
+| 3004 | hugo/content/spellbook/hugo/css.md:weight                |
 | 3004 | hugo/content/spellbook/setup/bootstrap.md:weight         |
-| 3005 | hugo/content/spellbook/hugo/rss.md:weight                |
+| 3005 | hugo/content/spellbook/hugo/code-block-headers.md:weight |
 | 3005 | hugo/content/spellbook/setup/configuration.md:weight     |
+| 3006 | hugo/content/spellbook/hugo/rss.md:weight                |
 
 ** Creating content
    :PROPERTIES:
    :EXPORT_FILE_NAME: creating-content
+   :EXPORT_HUGO_WEIGHT: 2005
    :END:
 *** Linking to static files
 
