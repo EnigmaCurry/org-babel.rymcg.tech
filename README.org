@@ -255,23 +255,22 @@ Configure the hugo dev server:
   (interactive)
   (let ((eshell-buffer-name (concat "*hugo-server-" rymcg/spellbook-hugo-root "*")))
     ;; Kill the old buffer if we're allowed to:
-    (if (bufferp (get-buffer eshell-buffer-name))
-        (save-window-excursion 
+    (save-window-excursion 
+      (if (bufferp (get-buffer eshell-buffer-name))
           (if (and kill (get-buffer-process eshell-buffer-name))
               ;; Kill buffer without asking about running process:
               (let ((kill-buffer-query-functions nil))
                 (kill-buffer eshell-buffer-name))
             ;; Prompt first if there's a running process:
-            (kill-buffer eshell-buffer-name))))
-    ;; Start a new server:
-    (eshell)
-    (eshell-return-to-prompt)
-    (insert (concat "cd " rymcg/spellbook-hugo-root))
-    (eshell-send-input)
-    (insert (concat rymcg/hugo-bin " server -D --navigateToChanged"))
-    (eshell-send-input)
-    (browse-url rymcg/hugo-server-url)
-    (message eshell-buffer-name)))
+            (kill-buffer eshell-buffer-name)))
+      ;; Start a new server:
+      (eshell)
+      (eshell-return-to-prompt)
+      (insert (concat "cd " rymcg/spellbook-hugo-root))
+      (eshell-send-input)
+      (insert (concat rymcg/hugo-bin " server -D --navigateToChanged"))
+      (eshell-send-input)))
+  (browse-url rymcg/hugo-server-url))
 #+END_SRC
 
 Use-package will automatically download ox-hugo from MELPA:
@@ -327,9 +326,15 @@ posts from Org to markdown, and building the HTML site with hugo:
           (let ((org-confirm-babel-evaluate nil))
             (org-babel-execute-src-block-maybe)))))))
 
-(defun rymcg/transmute-all ()
-  "Transmute all the spellbooks and build the hugo site"
-  (interactive)
+(defun rymcg/transmute-all (&optional leave-existing-content)
+  "Transmute all the spellbooks and rebuild the hugo site.
+  
+  Deletes all the content files first, unless leave-existing-content is non-nil."
+  (interactive "P")
+  (unless leave-existing-content
+    (let ((default-directory rymcg/spellbook-hugo-root))
+      (if (file-directory-p "content")
+          (delete-directory "content" 1))))
   (let ((func (lambda nil (dolist (spellbook-args rymcg/spellbooks)
                             (apply 'rymcg/transmute-spellbook spellbook-args))
                 (let ((default-directory rymcg/spellbook-hugo-root))
@@ -353,7 +358,6 @@ You can now build the site with =M-x rymcg/transmute-all=.
 :PROPERTIES:
 :EXPORT_HUGO_SECTION: spellbook/hugo
 :END:
-
 *** Hugo config file
 :PROPERTIES:
 :EXPORT_FILE_NAME: config
@@ -785,6 +789,34 @@ Add a link to the RSS in the page head:
   <link href="{{ .RSSLink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
 {{ end }}
 #+END_SRC
+
+*** Debug
+**** Auto weighting
+
+This will print the weight that gets written to each Markdown content
+file, in sorted order:
+#+BEGIN_SRC shell
+grep -R -E "^weight =" hugo/content | awk -v OFS="  " -F" " '{print $3, $1}' | sort -n
+#+END_SRC
+
+#+RESULTS:
+| 1001 | hugo/content/license/_index.md:weight                    |
+| 2001 | hugo/content/spellbook/_index.md:weight                  |
+| 2002 | hugo/content/spellbook/flow.md:weight                    |
+| 2003 | hugo/content/spellbook/transmutation.md:weight           |
+| 2004 | hugo/content/spellbook/creating-content.md:weight        |
+| 2004 | hugo/content/spellbook/hugo.md:weight                    |
+| 3001 | hugo/content/spellbook/hugo/config.md:weight             |
+| 3001 | hugo/content/spellbook/setup/_index.md:weight            |
+| 3002 | hugo/content/spellbook/hugo/template.md:weight           |
+| 3002 | hugo/content/spellbook/hugo/templates.md:weight          |
+| 3002 | hugo/content/spellbook/setup/dependencies.md:weight      |
+| 3003 | hugo/content/spellbook/hugo/css.md:weight                |
+| 3003 | hugo/content/spellbook/setup/install.md:weight           |
+| 3004 | hugo/content/spellbook/hugo/code-block-headers.md:weight |
+| 3004 | hugo/content/spellbook/setup/bootstrap.md:weight         |
+| 3005 | hugo/content/spellbook/hugo/rss.md:weight                |
+| 3005 | hugo/content/spellbook/setup/configuration.md:weight     |
 
 ** Creating content
    :PROPERTIES:
